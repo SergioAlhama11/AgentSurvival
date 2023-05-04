@@ -175,6 +175,14 @@ class Enviroment_with_agents(Enviroment):
         def _notify_time_iteration(self):
             pass
 
+        @property
+        def pos_x(self):
+            return self._pos_x
+
+        @property
+        def pos_y(self):
+            return self._pos_y
+
     class __Food(_Object):
         def __init__(self, pos_x, pos_y, period, environment):
             super().__init__(pos_x, pos_y, environment)
@@ -260,7 +268,7 @@ class Enviroment_with_agents(Enviroment):
             self._name = name
             self.__num_moves = 0
             self.__my_avatar = {}
-            self.__my_avatar[Orientation.DOWN] = pl.imread("images/Link.png")#avatar1.bmp")
+            self.__my_avatar[Orientation.DOWN] = (pl.imread("images/Link.png") * 255.0).astype(np.uint8)
             self.__my_avatar[Orientation.UP] = ndimage.rotate(self.__my_avatar[Orientation.DOWN],180)
             self.__my_avatar[Orientation.LEFT] = ndimage.rotate(self.__my_avatar[Orientation.UP],90)
             self.__my_avatar[Orientation.RIGHT] = ndimage.rotate(self.__my_avatar[Orientation.UP],270)
