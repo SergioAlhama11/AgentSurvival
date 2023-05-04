@@ -29,7 +29,7 @@ class WumpusWorld(Enviroment_with_agents):
             self.__my_avatar = pl.imread(path.join("images","exit_image.jpg")) # https://www.rawpixel.com/image/5917811/exit-sign-free-public-domain-cc0-photo
 
         def _exit(self, agent):
-            hiden_agent = self._environment._Enviroment_with_agents__get_hidden_agent2(agent)
+            hiden_agent = self._environment._Enviroment_with_agents__get_hidden_agent(agent, self)
             position = hiden_agent._get_position()
             if position[1] == self._pos_x and \
                     position[0] == self._pos_y:
@@ -60,7 +60,7 @@ class WumpusWorld(Enviroment_with_agents):
             self.__my_avatar = pl.imread(path.join("images","wumpus.png")) # https://www.rawpixel.com/image/5917811/exit-sign-free-public-domain-cc0-photo
 
         def _die(self, agent):
-            hiden_agent = self._environment._Enviroment_with_agents__get_hidden_agent2(agent)
+            hiden_agent = self._environment._Enviroment_with_agents__get_hidden_agent(agent, self)
             position = hiden_agent._get_position()
             if position[1] == self._pos_x and \
                     position[0] == self._pos_y:
@@ -115,8 +115,6 @@ class WumpusWorld(Enviroment_with_agents):
         self._start_orientation = Orientation.UP
         self._exit_found = False
         self.times_visited = np.zeros((self._size[0], self._size[1]))
-        self.__objects = {}
-        self.__objects_pointers = set()
 
         pos_x = np.random.randint(self._size[0])
         pos_y = np.random.randint(self._size[1])
@@ -163,15 +161,11 @@ class WumpusWorld(Enviroment_with_agents):
                 self.addObject(treasure, pos_x, pos_y)
 
         for i in range(self._size[0]):
-            self.__objects[i] = {}
             for j in range(self._size[1]):
-                self.__objects[i][j] = []
 
                 if np.random.rand() < 0.3:
-                    new_object = self.__Food(i, j, 10, self)
                     new_object = self.__Hole(i, j, self)
-                    self.__objects_pointers.add(new_object)
-                    self.__objects[i][j].append(new_object)
+                    self.addObject(new_object, pos_x,pos_y)
 
 
     def stop_condition(self):
@@ -208,114 +202,7 @@ class WumpusWorld(Enviroment_with_agents):
                              self._start_orientation,
                              life=life)
 
-    def plot(self, clear=True, time_interval=0.01):
-        if clear:
-            self._clear_plot()
-
-        super().plot(False, time_interval, None)
-        for ii in self.__objects:
-            for jj in self.__objects[ii]:
-                for kk in self.__objects[ii][jj]:
-                    kk.plot()
-
-        pl.gca().autoscale();
-        if clear:
-            self._show_plot(time_interval=time_interval)
-
-    class _Object(ABC):
-        def __init__(self, pos_x, pos_y, environment):
-            self._pos_x = pos_x
-            self._pos_y = pos_y
-            self._environment = environment
-
-        @abstractmethod
-        def _get_info(self):
-            pass
-
-        @abstractmethod
-        def plot(self):
-            pass
-
-        def _notify_time_iteration(self):
-            pass
-
-    class __Food(_Object):
-        def __init__(self, pos_x, pos_y, period, environment):
-            super().__init__(pos_x, pos_y, environment)
-            self._period = period
-            self._current_nutrients = period + 1
-            self.__nutrients = period - 1
-            self.__my_avatar = pl.imread("images/PixelTomato.bmp")
-            self.__my_avatar_2 = pl.imread("images/PixelNoTomato.bmp")
-            self.__is_active = True
-
-        def is_active(self):
-            if self.__is_active and self._current_nutrients > 0:
-                return True
-            elif self.__is_active:
-                self.__is_active = False
-
-            # No haya nutrientes o esté inactivo, se devuelve Falso
-            return False
-
-
-        def plot(self):
-            if self.is_active():
-                # pl.plot(self._pos_x + 0.5, self._pos_y + 0.5, 'go', markersize=3)
-                pl.gca().imshow(self.__my_avatar,
-                                extent=[self._pos_x + 0.2, self._pos_x + 0.8,
-                                        self._pos_y + 0.2, self._pos_y + 0.8])
-            else:
-                pl.gca().imshow(self.__my_avatar_2,
-                                extent=[self._pos_x + 0.2, self._pos_x + 0.8,
-                                        self._pos_y + 0.2, self._pos_y + 0.8])
-
-        def _eat(self, agent):
-            hiden_agent = self._environment._Enviroment_with_agents__get_hidden_agent(agent, self)
-            hiden_agent._check_and_increase_moves_per_turn() # This line should stop this function with an exception if too much moves have been consumed
-            position = hiden_agent._get_position()
-            num_moves = hiden_agent._get_num_moves()
-            if position[1] == self._pos_x and \
-                    position[0] == self._pos_y:
-                    # and num_moves < self._environment._max_moves_per_turn:
-
-                if self.is_active():
-                    self._current_nutrients -= 1
-                    hiden_agent._increase_life(1)#self.__nutrients)
-                    hiden_agent._send_message({'type': 'life_bonus', 'amount': 1,#self.__nutrients,
-                                               'Description': 'You have been given ' +
-                                                              str(1) + #str(self.__nutrients) +
-                                                              ' life points, because you have eaten food'})
-                    return 1
-                else:
-                    hiden_agent._send_message({'type': 'life_bonus', 'amount': 0,
-                                               'Description': 'You have been given ' + str(0) + ' life points, because you have eaten food'})
-                    return 0
-
-        def _notify_time_iteration(self):
-            if not self.is_active():
-                self._current_nutrients += 1
-
-                if self._current_nutrients >= self.__nutrients:
-                    self.__is_active = True
-
-        def _get_info(self):
-            if self.is_active():
-                return {'type': 'food type 1',
-                        'Description': 'This is a piece of food from a fixed source of food.'
-                                                              ' You eat the food and 1) you get life points, and '
-                                                              '2) in case you empty it, there will not be food for a number of epochs. '
-                                                              'To eat it, you have to '
-                                                              'invoke the function in the field eat_function with yourself as argument:'
-                                                              '<this_dictionary>[\'eat_function\'](self). You\'d be sent a message '
-                                                              'about the life_bonus in '
-                                                              'case you do it right, You would not, otherwise. In addition,'
-                                       'this function returns 1 in case of success, or 0 in case there is not more food',
-                        'eat_function': self._eat}
-            else:
-                return None
-
-    class __Hole(_Object):
+    class __Hole(Enviroment_with_agents._Object):
         def __init__(self, pos_x, pos_y, environment):
             super().__init__(pos_x, pos_y, environment)
             self.__my_avatar = pl.imread("images/hole.png")
