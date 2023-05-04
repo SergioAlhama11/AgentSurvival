@@ -260,7 +260,7 @@ class Enviroment_with_agents(Enviroment):
             self._name = name
             self.__num_moves = 0
             self.__my_avatar = {}
-            self.__my_avatar[Orientation.DOWN] = pl.imread("images/face1_borders.bmp")#avatar1.bmp")
+            self.__my_avatar[Orientation.DOWN] = pl.imread("images/Link.png")#avatar1.bmp")
             self.__my_avatar[Orientation.UP] = ndimage.rotate(self.__my_avatar[Orientation.DOWN],180)
             self.__my_avatar[Orientation.LEFT] = ndimage.rotate(self.__my_avatar[Orientation.UP],90)
             self.__my_avatar[Orientation.RIGHT] = ndimage.rotate(self.__my_avatar[Orientation.UP],270)
@@ -705,6 +705,10 @@ class Enviroment_with_agents(Enviroment):
             return self.__hidden_agents[id]
         else:
             return None
+
+    def __get_hidden_agent2(self, agent):
+        id = self.__outer_agent_ids[agent]
+        return self.__hidden_agents[id]
 
     def _whats_here(self, x, y, who_ask):
         objects = []

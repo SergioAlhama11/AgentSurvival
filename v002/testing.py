@@ -14,6 +14,9 @@ habrá que modificar algunas cosas almacenadas en el Laberinto, por lo que dicho
 dicha clase
 '''
 import sys
+
+from v002.WumpusWorld_m import WumpusWorld
+
 sys.path.insert(1, '.')
 import asyncio
 import datetime
@@ -410,6 +413,10 @@ def exit_from_laberinth(self, message=''):
     for i in objects:
         if i['type'] == 'exit':
             i['exit_function'](self)
+        if i['type'] == 'gameOver':
+            i['die_function'](self)
+        #if i['type'] == 'hole':
+            #i['die_function'](self)
 
     if walls['right'] == 0:
         self.turn_right()
@@ -792,16 +799,33 @@ def test_agent_as_a_function_in_laberinth():
 
 
 def test_inOutLaberinth():
-    lb1 = InOut_Simple_Laberinth(9, plot_run='every epoch', exit_at_border=True)
+    lb1 = InOut_Simple_Laberinth(5, plot_run='every epoch', exit_at_border=False)
 
     x = 1
     # lb1.create_agent('do nothing', do_nothing)
 
     for i in range(x):
-        # lb1.create_agent('silly' + str(i+1), move_silly)
-        # lb1.create_agent('Random' + str(i + 1), move_randomly)
-        lb1.create_agent('Smarter', exit_from_laberinth_complex_v2)#exit_from_laberinth_complex) #exit_from_laberinth)
-        # lb1.create_agent('RightWall', exit_from_laberinth)
+        #lb1.create_agent('silly' + str(i+1), move_silly)
+        #lb1.create_agent('Random' + str(i + 1), move_randomly)
+        #lb1.create_agent('Smarter', exit_from_laberinth_complex_v2)#exit_from_laberinth_complex) #exit_from_laberinth)
+        lb1.create_agent('RightWall', exit_from_laberinth)
+    winner = lb1.run()
+
+    if winner is not None:
+        print("There was a winner: ", winner)
+
+
+def test_WumpusWorld():
+    lb1 = WumpusWorld(5, plot_run='every epoch', exit_at_border=False)
+
+    x = 1
+    # lb1.create_agent('do nothing', do_nothing)
+
+    for i in range(x):
+        #lb1.create_agent('silly' + str(i+1), move_silly)
+        #lb1.create_agent('Random' + str(i + 1), move_randomly)
+        #lb1.create_agent('Smarter', exit_from_laberinth_complex_v2)#exit_from_laberinth_complex) #exit_from_laberinth)
+        lb1.create_agent('RightWall', exit_from_laberinth)
     winner = lb1.run()
 
     if winner is not None:
@@ -831,6 +855,7 @@ def test_emptyLaberinth():
     lb1 = No_Walls_Laberinth(10, plot_run='always')
 
     lb1.create_agent('yo', exit_from_laberinth)
+
     winner = lb1.run()
 
     if winner is not None:
@@ -979,13 +1004,14 @@ if __name__ == '__main__':
         # np.random.set_state(state)
         # print("Seed: ", np.random.get_state())
 
-        test_inOutLaberinth()
-        # test_inOutLaberinth_complex()
+        #test_inOutLaberinth()
+        test_WumpusWorld()
+        #test_inOutLaberinth_complex()
         # test_200inOutLaberingth()
 
         # test_agent_as_a_function_in_treasure()
         # test_agent_as_a_function_in_laberinth()
 
-        # test_emptyLaberinth()
+        #test_emptyLaberinth()
 
 # See PyCharm help at https://www.jetbrains.com/help/pycharm/
