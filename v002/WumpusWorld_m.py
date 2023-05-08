@@ -118,7 +118,7 @@ class WumpusWorld(Enviroment_with_agents):
                                            'Description': 'You died'})
 
         def _notify_time_iteration(self):
-            self
+            pass
 
         def _get_info(self):
             return {'type': 'wumpus', 'Description': 'Te has topado con el Wumpus y te ha deborado',
@@ -194,7 +194,7 @@ class WumpusWorld(Enviroment_with_agents):
                             extent=[self._pos_x + 0.2, self._pos_x + 0.8,
                                     self._pos_y + 0.2, self._pos_y + 0.8])
 
-    def __init__(self, size, entry_at_border=True, exit_at_border=True, plot_run='every epoch',
+    def __init__(self, size, laberinth, entry_at_border=True, exit_at_border=True, plot_run='every epoch',
                  move_protection=True, remove_walls_prob=0):
         moves_per_turn = 10 * size * size
         super().__init__(size, max_moves_per_turn=moves_per_turn,
@@ -207,7 +207,7 @@ class WumpusWorld(Enviroment_with_agents):
                          move_protection=move_protection,
                          plot_run=plot_run,
                          remove_walls_prob=remove_walls_prob)
-
+        self.__laberinth = laberinth
         self._entry_at_border = entry_at_border
         self._exit_at_border = exit_at_border
         self._start_orientation = Orientation.UP
@@ -218,8 +218,8 @@ class WumpusWorld(Enviroment_with_agents):
         pos_y = np.random.randint(self._size[1])
 
         num_wumpus = 1
-        #num_holes = 1
-        num_holes = np.random.randint(1, size / 2 - 1)
+        num_holes = 1
+        # num_holes = np.random.randint(1, size / 2 - 1)
 
         if self._entry_at_border:
             axis = np.random.choice([0, 1])
@@ -293,21 +293,15 @@ class WumpusWorld(Enviroment_with_agents):
         up_wind = self._Wind(up_wind_pos_x, up_wind_pos_y, self)
 
         # TODO implementar la logica que comprueba que no hay paredes a ninguno de los lados, si los hay no añade el objeto
-        if right_wind_pos_x < self._size[0]:
-            self.addObject(right_wind, right_wind_pos_x, right_wind_pos_y)
-        if down_wind_pos_x >= 0:
-            self.addObject(down_wind, down_wind_pos_x, down_wind_pos_y)
-        if left_wind_pos_x >= 0:
-            self.addObject(left_wind, left_wind_pos_x, left_wind_pos_y)
-        if up_wind_pos_x < self._size[1]:
-            self.addObject(up_wind, up_wind_pos_x, up_wind_pos_y)
-        else:
-            print("se ha pasado del limite")
-
-        '''self.addObject(right_wind, right_wind_pos_x, right_wind_pos_y)
-        self.addObject(down_wind, down_wind_pos_x, down_wind_pos_y)
-        self.addObject(left_wind, left_wind_pos_x, left_wind_pos_y)
-        self.addObject(up_wind, up_wind_pos_x, up_wind_pos_y)'''
+        if self.is_inLimit(right_wind_pos_x, down_wind_pos_x, left_wind_pos_x, up_wind_pos_x):
+            if not self.__laberinth._east_panel_at(self, pos_x, pos_y):
+                self.addObject(right_wind, right_wind_pos_x, right_wind_pos_y)
+            if not self.__laberinth._top_panel_at(self, pos_x - 1, pos_y):
+                self.addObject(down_wind, down_wind_pos_x, down_wind_pos_y)
+            if not self.__laberinth._east_panel_at(self, pos_x, pos_y - 1):
+                self.addObject(left_wind, left_wind_pos_x, left_wind_pos_y)
+            if not self.__laberinth._top_panel_at(self, pos_x, pos_y):
+                self.addObject(up_wind, up_wind_pos_x, up_wind_pos_y)
 
     def add_stench(self, pos_x, pos_y):
         right_stench_pos_x, right_stench_pos_y = pos_x + 1, pos_y
@@ -322,19 +316,19 @@ class WumpusWorld(Enviroment_with_agents):
 
         # TODO implementar la logica que comprueba que no hay paredes a ninguno de los lados, si los hay no añade el
         #  objeto
-        if right_stench_pos_x < self._size[0]:
-            self.addObject(right_stench, right_stench_pos_x, right_stench_pos_y)
-        if down_stench_pos_y >= 0:
-            self.addObject(down_stench, down_stench_pos_x, down_stench_pos_y)
-        if left_stench_pos_x >= 0:
-            self.addObject(left_stench, left_stench_pos_x, left_stench_pos_y)
-        if up_stench_pos_y < self._size[1]:
-            self.addObject(up_stench, up_stench_pos_x, up_stench_pos_y)
+        if self.is_inLimit(right_stench_pos_x, down_stench_pos_x, left_stench_pos_x, up_stench_pos_x):
+            if not self.__laberinth._east_panel_at(self, pos_x, pos_y):
+                self.addObject(right_stench, right_stench_pos_x, right_stench_pos_y)
+            if not self.__laberinth._top_panel_at(self, pos_x - 1, pos_y):
+                self.addObject(down_stench, down_stench_pos_x, down_stench_pos_y)
+            if not self.__laberinth._east_panel_at(self, pos_x, pos_y - 1):
+                self.addObject(left_stench, left_stench_pos_x, left_stench_pos_y)
+            if not self.__laberinth._top_panel_at(self, pos_x, pos_y):
+                self.addObject(up_stench, up_stench_pos_x, up_stench_pos_y)
 
-        '''self.addObject(right_stench, right_stench_pos_x, right_stench_pos_y)
-        self.addObject(down_stench, down_stench_pos_x, down_stench_pos_y)
-        self.addObject(left_stench, left_stench_pos_x, left_stench_pos_y)
-        self.addObject(up_stench, up_stench_pos_x, up_stench_pos_y)'''
+    def is_inLimit(self, right_pos, down_pos, left_pos, up_pos):
+        if right_pos < self._size[0] and down_pos >= 0 and left_pos >= 0 and up_pos < self._size[1]:
+            return True
 
     def stop_condition(self):
         num_cells_visited = {'null': 0}

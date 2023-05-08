@@ -822,7 +822,7 @@ def test_inOutLaberinth():
 
 
 def test_WumpusWorld():
-    lb1 = WumpusWorld(6, plot_run='every epoch', exit_at_border=False)
+    lb1 = WumpusWorld(7, WumpusWorld, plot_run='every epoch', exit_at_border=False)
 
     x = 1
     # lb1.create_agent('do nothing', do_nothing)
