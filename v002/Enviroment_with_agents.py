@@ -714,10 +714,6 @@ class Enviroment_with_agents(Enviroment):
         else:
             return None
 
-    def __get_hidden_agent2(self, agent):
-        id = self.__outer_agent_ids[agent]
-        return self.__hidden_agents[id]
-
     def _whats_here(self, x, y, who_ask):
         objects = []
 

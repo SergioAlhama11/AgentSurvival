@@ -91,9 +91,23 @@ class WumpusWorld(Enviroment_with_agents):
         def __init__(self, pos_x, pos_y, environment):
             super().__init__(pos_x, pos_y, environment)
             self.__my_avatar = pl.imread(path.join("images", "wumpus.png"))
+            self.__is_alive = True
+
+        def is_alive(self):
+            if self.__is_alive:
+                return True
+            else:
+                self.__is_alive = False
+            return False
+
+        def plot(self):
+            pl.gca().imshow(self.__my_avatar,
+                            extent=[self._pos_x + 0.2, self._pos_x + 0.8,
+                                    self._pos_y + 0.2, self._pos_y + 0.8])
 
         def _deathByWumpus(self, agent):
             hiden_agent = self._environment._Enviroment_with_agents__get_hidden_agent(agent, self)
+            hiden_agent._check_and_increase_moves_per_turn()
             position = hiden_agent._get_position()
             if position[1] == self._pos_x and \
                     position[0] == self._pos_y:
@@ -103,10 +117,8 @@ class WumpusWorld(Enviroment_with_agents):
                 hiden_agent._send_message({'type': 'unsuccess laberinth',
                                            'Description': 'You died'})
 
-        def plot(self):
-            pl.gca().imshow(self.__my_avatar,
-                            extent=[self._pos_x + 0.2, self._pos_x + 0.8,
-                                    self._pos_y + 0.2, self._pos_y + 0.8])
+        def _notify_time_iteration(self):
+            self
 
         def _get_info(self):
             return {'type': 'wumpus', 'Description': 'Te has topado con el Wumpus y te ha deborado',
@@ -133,8 +145,43 @@ class WumpusWorld(Enviroment_with_agents):
                             extent=[self._pos_x + 0.2, self._pos_x + 0.8,
                                     self._pos_y + 0.2, self._pos_y + 0.8])
 
+        def _notify_time_iteration(self):
+            pass
+
         def _get_info(self):
             return {'type': 'hole', 'Description': 'Has caido en un agujero', 'die_function': self._deathByHole}
+
+    class _Wind(Enviroment_with_agents._Object):
+        def __init__(self, pos_x, pos_y, environment):
+            super().__init__(pos_x, pos_y, environment)
+            self.__my_avatar = pl.imread(path.join("images", "wind.jpg"))
+
+        def plot(self):
+            pl.gca().imshow(self.__my_avatar,
+                            extent=[self._pos_x + 0.2, self._pos_x + 0.8,
+                                    self._pos_y + 0.2, self._pos_y + 0.8])
+
+        def _get_info(self):
+            pass
+
+        def _notify_time_iteration(self):
+            pass
+
+    class _Stench(Enviroment_with_agents._Object):
+        def __init__(self, pos_x, pos_y, environment):
+            super().__init__(pos_x, pos_y, environment)
+            self.__my_avatar = pl.imread(path.join("images", "stench.png"))
+
+        def plot(self):
+            pl.gca().imshow(self.__my_avatar,
+                            extent=[self._pos_x + 0.2, self._pos_x + 0.8,
+                                    self._pos_y + 0.2, self._pos_y + 0.8])
+
+        def _get_info(self):
+            pass
+
+        def _notify_time_iteration(self):
+            pass
 
     class _Treasure(_Exit):
         def __init__(self, pos_x, pos_y, environment):
@@ -171,7 +218,8 @@ class WumpusWorld(Enviroment_with_agents):
         pos_y = np.random.randint(self._size[1])
 
         num_wumpus = 1
-        num_holes = np.random.randint(1, size / 2 + 1)
+        #num_holes = 1
+        num_holes = np.random.randint(1, size / 2 - 1)
 
         if self._entry_at_border:
             axis = np.random.choice([0, 1])
@@ -192,14 +240,10 @@ class WumpusWorld(Enviroment_with_agents):
         self.addObject(self.entry, pos_x, pos_y)
 
         while True:
-            pos_x = np.random.randint(self._size[0])
-            pos_y = np.random.randint(self._size[1])
 
-            wumpus_pos_x = np.random.randint(self._size[0])
-            wumpus_pos_y = np.random.randint(self._size[1])
-
-            hole_pos_x = np.random.randint(self._size[0])
-            hole_pos_y = np.random.randint(self._size[1])
+            pos_x, pos_y = self.random_position()
+            wumpus_pos_x, wumpus_pos_y = self.random_position()
+            hole_pos_x, hole_pos_y = self.random_position()
 
             if (pos_x, pos_y) != (wumpus_pos_x, wumpus_pos_y) and \
                     (pos_x, pos_y) != (hole_pos_x, hole_pos_y) and \
@@ -209,13 +253,13 @@ class WumpusWorld(Enviroment_with_agents):
         for i in range(num_wumpus):
             wumpus = self._Wumpus(wumpus_pos_x, wumpus_pos_y, self)
             self.addObject(wumpus, wumpus_pos_x, wumpus_pos_y)
-            wumpus_pos_x = np.random.randint(self._size[0])
-            wumpus_pos_y = np.random.randint(self._size[1])
+            self.add_stench(wumpus_pos_x, wumpus_pos_y)
+            wumpus_pos_x, wumpus_pos_y = self.random_position()
         for i in range(num_holes):
             hole = self._Hole(hole_pos_x, hole_pos_y, self)
             self.addObject(hole, hole_pos_x, hole_pos_y)
-            hole_pos_x = np.random.randint(self._size[0])
-            hole_pos_y = np.random.randint(self._size[1])
+            self.add_wind(hole_pos_x, hole_pos_y)
+            hole_pos_x, hole_pos_y = self.random_position()
 
         if exit_at_border != 'no exit':
             if self._exit_at_border:
@@ -232,11 +276,65 @@ class WumpusWorld(Enviroment_with_agents):
                 treasure = self._Treasure(pos_x, pos_y, self)
                 self.addObject(treasure, pos_x, pos_y)
 
-        # for i in range(self._size[0]):
-        # for j in range(self._size[1]):
-        # if np.random.rand() < 0.3:
-        # new_object = self.__Hole(i, j, self)
-        # self.addObject(new_object, pos_x, pos_y)
+    def random_position(self):
+        pos_x = np.random.randint(self._size[0])
+        pos_y = np.random.randint(self._size[1])
+        return pos_x, pos_y
+
+    def add_wind(self, pos_x, pos_y):
+        right_wind_pos_x, right_wind_pos_y = pos_x + 1, pos_y
+        down_wind_pos_x, down_wind_pos_y = pos_x, pos_y - 1
+        left_wind_pos_x, left_wind_pos_y = pos_x - 1, pos_y
+        up_wind_pos_x, up_wind_pos_y = pos_x, pos_y + 1
+
+        right_wind = self._Wind(right_wind_pos_x, right_wind_pos_y, self)
+        down_wind = self._Wind(down_wind_pos_x, down_wind_pos_y, self)
+        left_wind = self._Wind(left_wind_pos_x, left_wind_pos_y, self)
+        up_wind = self._Wind(up_wind_pos_x, up_wind_pos_y, self)
+
+        # TODO implementar la logica que comprueba que no hay paredes a ninguno de los lados, si los hay no añade el objeto
+        if right_wind_pos_x < self._size[0]:
+            self.addObject(right_wind, right_wind_pos_x, right_wind_pos_y)
+        if down_wind_pos_x >= 0:
+            self.addObject(down_wind, down_wind_pos_x, down_wind_pos_y)
+        if left_wind_pos_x >= 0:
+            self.addObject(left_wind, left_wind_pos_x, left_wind_pos_y)
+        if up_wind_pos_x < self._size[1]:
+            self.addObject(up_wind, up_wind_pos_x, up_wind_pos_y)
+        else:
+            print("se ha pasado del limite")
+
+        '''self.addObject(right_wind, right_wind_pos_x, right_wind_pos_y)
+        self.addObject(down_wind, down_wind_pos_x, down_wind_pos_y)
+        self.addObject(left_wind, left_wind_pos_x, left_wind_pos_y)
+        self.addObject(up_wind, up_wind_pos_x, up_wind_pos_y)'''
+
+    def add_stench(self, pos_x, pos_y):
+        right_stench_pos_x, right_stench_pos_y = pos_x + 1, pos_y
+        down_stench_pos_x, down_stench_pos_y = pos_x, pos_y - 1
+        left_stench_pos_x, left_stench_pos_y = pos_x - 1, pos_y
+        up_stench_pos_x, up_stench_pos_y = pos_x, pos_y + 1
+
+        right_stench = self._Stench(right_stench_pos_x, right_stench_pos_y, self)
+        down_stench = self._Stench(down_stench_pos_x, down_stench_pos_y, self)
+        left_stench = self._Stench(left_stench_pos_x, left_stench_pos_y, self)
+        up_stench = self._Stench(up_stench_pos_x, up_stench_pos_y, self)
+
+        # TODO implementar la logica que comprueba que no hay paredes a ninguno de los lados, si los hay no añade el
+        #  objeto
+        if right_stench_pos_x < self._size[0]:
+            self.addObject(right_stench, right_stench_pos_x, right_stench_pos_y)
+        if down_stench_pos_y >= 0:
+            self.addObject(down_stench, down_stench_pos_x, down_stench_pos_y)
+        if left_stench_pos_x >= 0:
+            self.addObject(left_stench, left_stench_pos_x, left_stench_pos_y)
+        if up_stench_pos_y < self._size[1]:
+            self.addObject(up_stench, up_stench_pos_x, up_stench_pos_y)
+
+        '''self.addObject(right_stench, right_stench_pos_x, right_stench_pos_y)
+        self.addObject(down_stench, down_stench_pos_x, down_stench_pos_y)
+        self.addObject(left_stench, left_stench_pos_x, left_stench_pos_y)
+        self.addObject(up_stench, up_stench_pos_x, up_stench_pos_y)'''
 
     def stop_condition(self):
         num_cells_visited = {'null': 0}
