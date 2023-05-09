@@ -55,38 +55,6 @@ class WumpusWorld(Enviroment_with_agents):
                                                    'case you do it right. You would not, otherwise',
                     'exit_function': self._exit}
 
-    '''class _GameOver(Enviroment_with_agents._Object):
-        def __init__(self, pos_x, pos_y, environment):
-            super().__init__(pos_x, pos_y, environment)
-            self.__my_avatar = pl.imread(path.join("images",
-                                                   "wumpus.png"))  # https://www.rawpixel.com/image/5917811/exit-sign-free-public-domain-cc0-photo
-
-        def _die(self, agent):
-            hiden_agent = self._environment._Enviroment_with_agents__get_hidden_agent(agent, self)
-            position = hiden_agent._get_position()
-            if position[1] == self._pos_x and \
-                    position[0] == self._pos_y:
-                self._environment._died = True
-                self._environment._winner = None
-                hiden_agent._should_stop = True
-                hiden_agent._send_message({'type': 'unsuccess laberinth',
-                                           'Description': 'You died'})
-
-        def plot(self):
-            # pl.plot(self._pos_x + 0.5, self._pos_y + 0.5, 'ro') #punto rojo
-            pl.gca().imshow(self.__my_avatar,
-                            extent=[self._pos_x + 0.1, self._pos_x + 0.9,
-                                    self._pos_y + 0.1, self._pos_y + 0.9])
-
-        def _get_info(self):
-            return {'type': 'gameOver', 'Description': 'This is the end of the game. '
-                                                       'To finish, invoke the function in the field '
-                                                       'exit_function with yourself as argument:'
-                                                       '<this_dictionary>[\'exit_function\'](self). You\'d be sent a success message '
-                                                       ' in '
-                                                       'case you do it right. You would not, otherwise',
-                    'die_function': self._die} '''
-
     class _Wumpus(Enviroment_with_agents._Object):
         def __init__(self, pos_x, pos_y, environment):
             super().__init__(pos_x, pos_y, environment)
@@ -118,7 +86,11 @@ class WumpusWorld(Enviroment_with_agents):
                                            'Description': 'You died'})
 
         def _notify_time_iteration(self):
-            pass
+            position = self._environment._Hidden_Agent._get_position(self)
+
+            if position[1] == self._pos_x and \
+                    position[0] == self._pos_y:
+                print("WUMPUS")
 
         def _get_info(self):
             return {'type': 'wumpus', 'Description': 'Te has topado con el Wumpus y te ha deborado',
@@ -240,7 +212,6 @@ class WumpusWorld(Enviroment_with_agents):
         self.addObject(self.entry, pos_x, pos_y)
 
         while True:
-
             pos_x, pos_y = self.random_position()
             wumpus_pos_x, wumpus_pos_y = self.random_position()
             hole_pos_x, hole_pos_y = self.random_position()
@@ -277,31 +248,9 @@ class WumpusWorld(Enviroment_with_agents):
                 self.addObject(treasure, pos_x, pos_y)
 
     def random_position(self):
-        pos_x = np.random.randint(self._size[0])
-        pos_y = np.random.randint(self._size[1])
-        return pos_x, pos_y
-
-    def add_wind(self, pos_x, pos_y):
-        right_wind_pos_x, right_wind_pos_y = pos_x + 1, pos_y
-        down_wind_pos_x, down_wind_pos_y = pos_x, pos_y - 1
-        left_wind_pos_x, left_wind_pos_y = pos_x - 1, pos_y
-        up_wind_pos_x, up_wind_pos_y = pos_x, pos_y + 1
-
-        right_wind = self._Wind(right_wind_pos_x, right_wind_pos_y, self)
-        down_wind = self._Wind(down_wind_pos_x, down_wind_pos_y, self)
-        left_wind = self._Wind(left_wind_pos_x, left_wind_pos_y, self)
-        up_wind = self._Wind(up_wind_pos_x, up_wind_pos_y, self)
-
-        # TODO implementar la logica que comprueba que no hay paredes a ninguno de los lados, si los hay no añade el objeto
-        if self.is_inLimit(right_wind_pos_x, down_wind_pos_x, left_wind_pos_x, up_wind_pos_x):
-            if not self.__laberinth._east_panel_at(self, pos_x, pos_y):
-                self.addObject(right_wind, right_wind_pos_x, right_wind_pos_y)
-            if not self.__laberinth._top_panel_at(self, pos_x - 1, pos_y):
-                self.addObject(down_wind, down_wind_pos_x, down_wind_pos_y)
-            if not self.__laberinth._east_panel_at(self, pos_x, pos_y - 1):
-                self.addObject(left_wind, left_wind_pos_x, left_wind_pos_y)
-            if not self.__laberinth._top_panel_at(self, pos_x, pos_y):
-                self.addObject(up_wind, up_wind_pos_x, up_wind_pos_y)
+        x = np.random.randint(0, self._size[0] - 1)
+        y = np.random.randint(0, self._size[1] - 1)
+        return x, y
 
     def add_stench(self, pos_x, pos_y):
         right_stench_pos_x, right_stench_pos_y = pos_x + 1, pos_y
@@ -314,20 +263,61 @@ class WumpusWorld(Enviroment_with_agents):
         left_stench = self._Stench(left_stench_pos_x, left_stench_pos_y, self)
         up_stench = self._Stench(up_stench_pos_x, up_stench_pos_y, self)
 
-        # TODO implementar la logica que comprueba que no hay paredes a ninguno de los lados, si los hay no añade el
-        #  objeto
-        if self.is_inLimit(right_stench_pos_x, down_stench_pos_x, left_stench_pos_x, up_stench_pos_x):
-            if not self.__laberinth._east_panel_at(self, pos_x, pos_y):
-                self.addObject(right_stench, right_stench_pos_x, right_stench_pos_y)
-            if not self.__laberinth._top_panel_at(self, pos_x - 1, pos_y):
-                self.addObject(down_stench, down_stench_pos_x, down_stench_pos_y)
-            if not self.__laberinth._east_panel_at(self, pos_x, pos_y - 1):
-                self.addObject(left_stench, left_stench_pos_x, left_stench_pos_y)
-            if not self.__laberinth._top_panel_at(self, pos_x, pos_y):
-                self.addObject(up_stench, up_stench_pos_x, up_stench_pos_y)
+        if not self.exists_upperWall(pos_x, pos_y) and self.is_inTopLimit(up_stench_pos_x):
+            self.addObject(up_stench, up_stench_pos_x, up_stench_pos_y)
+        if not self.exists_bottomWall(pos_x, pos_y) and self.is_inBottomLimit(down_stench_pos_x):
+            self.addObject(down_stench, down_stench_pos_x, down_stench_pos_y)
+        if not self.exists_rightWall(pos_x, pos_y) and self.is_inRightLimit(right_stench_pos_x):
+            self.addObject(right_stench, right_stench_pos_x, right_stench_pos_y)
+        if not self.exists_leftWall(pos_x, pos_y) and self.is_inLeftLimit(left_stench_pos_x):
+            self.addObject(left_stench, left_stench_pos_x, left_stench_pos_y)
 
-    def is_inLimit(self, right_pos, down_pos, left_pos, up_pos):
-        if right_pos < self._size[0] and down_pos >= 0 and left_pos >= 0 and up_pos < self._size[1]:
+    def add_wind(self, pos_x, pos_y):
+        right_wind_pos_x, right_wind_pos_y = pos_x + 1, pos_y
+        down_wind_pos_x, down_wind_pos_y = pos_x, pos_y - 1
+        left_wind_pos_x, left_wind_pos_y = pos_x - 1, pos_y
+        up_wind_pos_x, up_wind_pos_y = pos_x, pos_y + 1
+
+        right_wind = self._Wind(right_wind_pos_x, right_wind_pos_y, self)
+        down_wind = self._Wind(down_wind_pos_x, down_wind_pos_y, self)
+        left_wind = self._Wind(left_wind_pos_x, left_wind_pos_y, self)
+        up_wind = self._Wind(up_wind_pos_x, up_wind_pos_y, self)
+
+        if not self.exists_upperWall(pos_x, pos_y) and self.is_inTopLimit(up_wind_pos_x):
+            self.addObject(up_wind, up_wind_pos_x, up_wind_pos_y)
+        if not self.exists_bottomWall(pos_x, pos_y) and self.is_inBottomLimit(down_wind_pos_x):
+            self.addObject(down_wind, down_wind_pos_x, down_wind_pos_y)
+        if not self.exists_rightWall(pos_x, pos_y) and self.is_inRightLimit(right_wind_pos_x):
+            self.addObject(right_wind, right_wind_pos_x, right_wind_pos_y)
+        if not self.exists_leftWall(pos_x, pos_y) and self.is_inLeftLimit(left_wind_pos_x):
+            self.addObject(left_wind, left_wind_pos_x, left_wind_pos_y)
+
+    def exists_upperWall(self, pos_x, pos_y):
+        return self.__laberinth._top_panel_at(self, pos_x, pos_y)
+
+    def exists_bottomWall(self, pos_x, pos_y):
+        return self.__laberinth._top_panel_at(self, pos_x - 1, pos_y)
+
+    def exists_leftWall(self, pos_x, pos_y):
+        return self.__laberinth._east_panel_at(self, pos_x, pos_y - 1)
+
+    def exists_rightWall(self, pos_x, pos_y):
+        return self.__laberinth._east_panel_at(self, pos_x, pos_y)
+
+    def is_inTopLimit(self, up_pos):
+        if up_pos < self._size[1] - 1:
+            return True
+
+    def is_inBottomLimit(self, down_pos):
+        if down_pos >= 0:
+            return True
+
+    def is_inLeftLimit(self, left_pos):
+        if left_pos >= 0:
+            return True
+
+    def is_inRightLimit(self, right_pos):
+        if right_pos < self._size[0] - 1:
             return True
 
     def stop_condition(self):

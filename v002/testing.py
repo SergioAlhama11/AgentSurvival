@@ -410,8 +410,6 @@ def exit_from_laberinth(self, message=''):
     whats_here = self.whats_here()
     objects = whats_here['objects']
     walls = whats_here['walls']
-    #wumpus = whats_here['wumpus']
-    #hole = whats_here['hole']
     for i in objects:
         if i['type'] == 'exit':
             i['exit_function'](self)
@@ -822,7 +820,7 @@ def test_inOutLaberinth():
 
 
 def test_WumpusWorld():
-    lb1 = WumpusWorld(7, WumpusWorld, plot_run='every epoch', exit_at_border=False)
+    lb1 = WumpusWorld(6, WumpusWorld, plot_run='every epoch', exit_at_border=False)
 
     x = 1
     # lb1.create_agent('do nothing', do_nothing)

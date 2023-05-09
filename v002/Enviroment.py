@@ -14,6 +14,8 @@ from v002 import pl, i_am_in_interatcive
 import time
 
 from enum import IntEnum
+
+
 class Orientation(IntEnum):
     UP = 0
     RIGHT = 1
@@ -28,11 +30,14 @@ class Orientation(IntEnum):
         v = (self.value + 3) % 4
         return Orientation(v)
 
+
 class OrientationException(Exception):
     pass
 
+
 class TooMuchMovesPerTurn(Exception):
     pass
+
 
 '''
 Clase que crea laberintos. Se pueden especificar si puede haber más de un camino o no y si las entradas y salidas
@@ -43,6 +48,8 @@ En cada iteración, se selecciona una celda que sea frontera de un cluster (fron
 los cuales deben ser de otro cluster si no se permite más de un camino, o podría ser del mismo cluster si se permite
 más de un camino), y se elimina el panel que conduce a una celda adyacente.
 '''
+
+
 class Enviroment:
     class __Cell:
         def __init__(self, i, j, cluster, adjacents=None):
@@ -59,6 +66,7 @@ class Enviroment:
     '''
     Al principio, cada celda pertenece a un único cluster
     '''
+
     def _initClusters(self):
 
         cluster = 0
@@ -82,7 +90,7 @@ class Enviroment:
                 new_cell = self.__Cell(i, j, cluster, adjacents.copy())
                 new_cluster = self.__Cluster(cluster)
                 new_cluster.cells.append((i, j))
-                new_cluster.frontier.append((i,j))
+                new_cluster.frontier.append((i, j))
                 cells_2_cluster[(i, j)] = cluster
 
                 all_clusters[cluster] = new_cluster
@@ -94,6 +102,7 @@ class Enviroment:
     '''
     Esta función selecciona un par de celdas adyacentes, las devuelve junto a sus clústeres asociados
     '''
+
     def _select_neighbours(self):
         num_clusters = len(self.all_clusters)
         selected_cluster = list(self.all_clusters.keys())[np.random.randint(0, num_clusters)]
@@ -114,6 +123,7 @@ class Enviroment:
     '''
     Esta es la función importante, que va creando el laberinto poco a poco.
     '''
+
     def _iterate_clustering(self):
         # Primero selecciona dos celdas adyacentes
         selected_cluster, selected_cell, selected_neigh_cell, selected_neigh_cluster = self._select_neighbours()
@@ -143,7 +153,8 @@ class Enviroment:
                         self.all_cells[j].adjacents.remove(i)
 
                         # Si alguna celda del cluster destino pierde sus adyacencias, hay que sacarlo de la frontera
-                        if (len(self.all_cells[j].adjacents) <= 0 and j in self.all_clusters[selected_cluster].frontier):
+                        if (len(self.all_cells[j].adjacents) <= 0 and j in self.all_clusters[
+                            selected_cluster].frontier):
                             self.all_clusters[selected_cluster].frontier.remove(j)
 
             # Asignar esta celda al cluster destino
@@ -165,17 +176,17 @@ class Enviroment:
             del self.all_clusters[selected_neigh_cluster]
 
         # Calcular qué panel hay que quitar
-        changing_cell = np.asarray([selected_cell,selected_neigh_cell]).min(axis=0)
+        changing_cell = np.asarray([selected_cell, selected_neigh_cell]).min(axis=0)
 
-        if selected_cell[0] == selected_neigh_cell[0]: #v_panel
+        if selected_cell[0] == selected_neigh_cell[0]:  # v_panel
             self._v_panels[changing_cell[0], changing_cell[1]] = 0
-        else: #h_panel
+        else:  # h_panel
             self._h_panels[changing_cell[0], changing_cell[1]] = 0
 
-    def __init__(self, size, no_adjacents_in_cluster = False,
-                 show_construction = False, remove_walls_prob = 0):#,
-                 # entry_at_border = True,
-                 # treasure_at_border = True):
+    def __init__(self, size, no_adjacents_in_cluster=False,
+                 show_construction=False, remove_walls_prob=0):  # ,
+        # entry_at_border = True,
+        # treasure_at_border = True):
         self._size = (size, size)
         self._h_panels = []
         self._v_panels = []
@@ -215,24 +226,25 @@ class Enviroment:
 
         # Creación mediante eliminación de paneles hasta que inicio y fin pertenezcan al mismo cluster, o haya más de un cluster
 
-        while len(self.all_clusters) > 1: #self.cells_2_clusters[self.start_cell] != self.cells_2_clusters[self.treasure]:
+        while len(
+                self.all_clusters) > 1:  # self.cells_2_clusters[self.start_cell] != self.cells_2_clusters[self.treasure]:
             if len(self.all_clusters) > 1:
                 self._iterate_clustering()
 
                 if self.show_construction:
                     self.plot()
 
-        for i in range(self._h_panels.shape[0]-1):
+        for i in range(self._h_panels.shape[0] - 1):
             for j in range(self._h_panels.shape[1]):
                 if np.random.rand() <= remove_walls_prob:
-                    self._h_panels[i,j] = 0
+                    self._h_panels[i, j] = 0
 
         for i in range(self._v_panels.shape[0]):
-            for j in range(self._v_panels.shape[1]-1):
+            for j in range(self._v_panels.shape[1] - 1):
                 if np.random.rand() <= remove_walls_prob:
-                    self._v_panels[i,j] = 0
+                    self._v_panels[i, j] = 0
 
-    def _show_plot(self, time_interval = 0.01):
+    def _show_plot(self, time_interval=0.01):
         if i_am_in_interatcive:
             from IPython import display;
             pl.rcParams['figure.figsize'] = [8, 8]
@@ -275,7 +287,6 @@ class Enviroment:
                 pl.ioff()
             pl.clf()
 
-
     def plot(self, clear=True):
 
         # ts1 = datetime.now()
@@ -291,12 +302,12 @@ class Enviroment:
             box_y = [0, 0, self._size[1], self._size[1], 0]
             pl.plot(box_x, box_y)
 
-            for i_1,i in zip(range(self._size[0]), range(1, self._size[0] + 1)):
-                for j_1,j in zip(range(self._size[1]), range(1, self._size[1] + 1)):
+            for i_1, i in zip(range(self._size[0]), range(1, self._size[0] + 1)):
+                for j_1, j in zip(range(self._size[1]), range(1, self._size[1] + 1)):
                     if self._h_panels[i_1, j_1] == 1:
-                        pl.plot([j,j-1],[i,i], color='blue')
+                        pl.plot([j, j - 1], [i, i], color='blue')
                     if self._v_panels[i_1, j_1] == 1:
-                        pl.plot([j,j],[i-1,i],color='blue')
+                        pl.plot([j, j], [i - 1, i], color='blue')
 
             # pl.plot(self.start_cell[1] + 0.5, self.start_cell[0] + 0.5, 'go') #punto verde
             # pl.plot(self.treasure[1] + 0.5, self.treasure[0] + 0.5, 'ro') #punto rojo
@@ -317,7 +328,6 @@ class Enviroment:
         # ts4 = datetime.now()
 
         # print('clear: ', ts2 - ts1, ' | plotting: ', ts3 - ts2, ' | show: ', ts4 - ts3)
-
 
     def _top_panel_at(self, x, y):
         return self._h_panels[x, y] == 1
