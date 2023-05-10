@@ -86,11 +86,7 @@ class WumpusWorld(Enviroment_with_agents):
                                            'Description': 'You died'})
 
         def _notify_time_iteration(self):
-            position = self._environment._Hidden_Agent._get_position(self)
-
-            if position[1] == self._pos_x and \
-                    position[0] == self._pos_y:
-                print("WUMPUS")
+            pass
 
         def _get_info(self):
             return {'type': 'wumpus', 'Description': 'Te has topado con el Wumpus y te ha deborado',
@@ -100,7 +96,6 @@ class WumpusWorld(Enviroment_with_agents):
         def __init__(self, pos_x, pos_y, environment):
             super().__init__(pos_x, pos_y, environment)
             self.__my_avatar = pl.imread(path.join("images", "hoyo.png"))
-
         def _deathByHole(self, agent):
             hiden_agent = self._environment._Enviroment_with_agents__get_hidden_agent(agent, self)
             position = hiden_agent._get_position()
@@ -131,13 +126,21 @@ class WumpusWorld(Enviroment_with_agents):
         def plot(self):
             pl.gca().imshow(self.__my_avatar,
                             extent=[self._pos_x + 0.2, self._pos_x + 0.8,
-                                    self._pos_y + 0.2, self._pos_y + 0.8])
+                                    self._pos_y + 0.2, self._pos_y + 0.8], alpha=0.5)
 
-        def _get_info(self):
-            pass
+        def wind(self, agent):
+            hiden_agent = self._environment._Enviroment_with_agents__get_hidden_agent(agent, self)
+            position = hiden_agent._get_position()
+            if position[1] == self._pos_x and \
+                    position[0] == self._pos_y:
+                hiden_agent._send_message({'type': 'wind',
+                                           'Description': 'There is a hole so close'})
 
         def _notify_time_iteration(self):
-            pass
+           pass
+
+        def _get_info(self):
+            return {'type': 'wind', 'Description': 'Hay un agujero cerca', 'info': self.wind}
 
     class _Stench(Enviroment_with_agents._Object):
         def __init__(self, pos_x, pos_y, environment):
@@ -147,13 +150,21 @@ class WumpusWorld(Enviroment_with_agents):
         def plot(self):
             pl.gca().imshow(self.__my_avatar,
                             extent=[self._pos_x + 0.2, self._pos_x + 0.8,
-                                    self._pos_y + 0.2, self._pos_y + 0.8])
+                                    self._pos_y + 0.2, self._pos_y + 0.8], alpha=0.5)
 
-        def _get_info(self):
-            pass
+        def stench(self, agent):
+            hiden_agent = self._environment._Enviroment_with_agents__get_hidden_agent(agent, self)
+            position = hiden_agent._get_position()
+            if position[1] == self._pos_x and \
+                    position[0] == self._pos_y:
+                hiden_agent._send_message({'type': 'stench',
+                                           'Description': 'There is a wumpus close'})
 
         def _notify_time_iteration(self):
             pass
+
+        def _get_info(self):
+            return {'type': 'stench', 'Description': 'Está el wumpus cerca', 'info': self.stench}
 
     class _Treasure(_Exit):
         def __init__(self, pos_x, pos_y, environment):
@@ -190,8 +201,8 @@ class WumpusWorld(Enviroment_with_agents):
         pos_y = np.random.randint(self._size[1])
 
         num_wumpus = 1
-        num_holes = 1
-        # num_holes = np.random.randint(1, size / 2 - 1)
+        # num_holes = 1
+        num_holes = np.random.randint(1, size / 2 - 1)
 
         if self._entry_at_border:
             axis = np.random.choice([0, 1])
@@ -263,13 +274,13 @@ class WumpusWorld(Enviroment_with_agents):
         left_stench = self._Stench(left_stench_pos_x, left_stench_pos_y, self)
         up_stench = self._Stench(up_stench_pos_x, up_stench_pos_y, self)
 
-        if not self.exists_upperWall(pos_x, pos_y) and self.is_inTopLimit(up_stench_pos_x):
+        if not self.exists_upperWall(pos_x, pos_y) and self.is_inTopLimit(up_stench_pos_x, up_stench_pos_y):
             self.addObject(up_stench, up_stench_pos_x, up_stench_pos_y)
-        if not self.exists_bottomWall(pos_x, pos_y) and self.is_inBottomLimit(down_stench_pos_x):
+        if not self.exists_bottomWall(pos_x, pos_y) and self.is_inBottomLimit(down_stench_pos_x, down_stench_pos_y):
             self.addObject(down_stench, down_stench_pos_x, down_stench_pos_y)
-        if not self.exists_rightWall(pos_x, pos_y) and self.is_inRightLimit(right_stench_pos_x):
+        if not self.exists_rightWall(pos_x, pos_y) and self.is_inRightLimit(right_stench_pos_x, right_stench_pos_y):
             self.addObject(right_stench, right_stench_pos_x, right_stench_pos_y)
-        if not self.exists_leftWall(pos_x, pos_y) and self.is_inLeftLimit(left_stench_pos_x):
+        if not self.exists_leftWall(pos_x, pos_y) and self.is_inLeftLimit(left_stench_pos_x, left_stench_pos_y):
             self.addObject(left_stench, left_stench_pos_x, left_stench_pos_y)
 
     def add_wind(self, pos_x, pos_y):
@@ -283,41 +294,45 @@ class WumpusWorld(Enviroment_with_agents):
         left_wind = self._Wind(left_wind_pos_x, left_wind_pos_y, self)
         up_wind = self._Wind(up_wind_pos_x, up_wind_pos_y, self)
 
-        if not self.exists_upperWall(pos_x, pos_y) and self.is_inTopLimit(up_wind_pos_x):
+        if not self.exists_upperWall(pos_x, pos_y) and self.is_inTopLimit(up_wind_pos_x, up_wind_pos_y):
             self.addObject(up_wind, up_wind_pos_x, up_wind_pos_y)
-        if not self.exists_bottomWall(pos_x, pos_y) and self.is_inBottomLimit(down_wind_pos_x):
+        if not self.exists_bottomWall(pos_x, pos_y) and self.is_inBottomLimit(down_wind_pos_x, down_wind_pos_y):
             self.addObject(down_wind, down_wind_pos_x, down_wind_pos_y)
-        if not self.exists_rightWall(pos_x, pos_y) and self.is_inRightLimit(right_wind_pos_x):
+        if not self.exists_rightWall(pos_x, pos_y) and self.is_inRightLimit(right_wind_pos_x, right_wind_pos_y):
             self.addObject(right_wind, right_wind_pos_x, right_wind_pos_y)
-        if not self.exists_leftWall(pos_x, pos_y) and self.is_inLeftLimit(left_wind_pos_x):
+        if not self.exists_leftWall(pos_x, pos_y) and self.is_inLeftLimit(left_wind_pos_x, left_wind_pos_y):
             self.addObject(left_wind, left_wind_pos_x, left_wind_pos_y)
 
+    '''Comprobamos si en las casillas adyacentes hay paredes o no'''
+
     def exists_upperWall(self, pos_x, pos_y):
-        return self.__laberinth._top_panel_at(self, pos_x, pos_y)
+        return self.__laberinth._top_panel_at(self, pos_y, pos_x)
 
     def exists_bottomWall(self, pos_x, pos_y):
-        return self.__laberinth._top_panel_at(self, pos_x - 1, pos_y)
+        return self.__laberinth._top_panel_at(self, pos_y - 1, pos_x)
 
     def exists_leftWall(self, pos_x, pos_y):
-        return self.__laberinth._east_panel_at(self, pos_x, pos_y - 1)
+        return self.__laberinth._east_panel_at(self, pos_y, pos_x - 1)
 
     def exists_rightWall(self, pos_x, pos_y):
-        return self.__laberinth._east_panel_at(self, pos_x, pos_y)
+        return self.__laberinth._east_panel_at(self, pos_y, pos_x)
 
-    def is_inTopLimit(self, up_pos):
-        if up_pos < self._size[1] - 1:
+    '''Controlamos que siempre estén dentro de los limites del laberinto'''
+
+    def is_inTopLimit(self, up_pos_x, up_pos_y):
+        if 0 <= up_pos_x < self._size[0] and 0 <= up_pos_y < self._size[1]:
             return True
 
-    def is_inBottomLimit(self, down_pos):
-        if down_pos >= 0:
+    def is_inBottomLimit(self, down_pos_x, down_pos_y):
+        if 0 <= down_pos_x < self._size[0] and 0 <= down_pos_y < self._size[1]:
             return True
 
-    def is_inLeftLimit(self, left_pos):
-        if left_pos >= 0:
+    def is_inLeftLimit(self, left_pos_x, left_pos_y):
+        if 0 <= left_pos_x < self._size[0] and 0 <= left_pos_y < self._size[1]:
             return True
 
-    def is_inRightLimit(self, right_pos):
-        if right_pos < self._size[0] - 1:
+    def is_inRightLimit(self, right_pos_x, right_pos_y):
+        if 0 <= right_pos_x < self._size[0] and 0 <= right_pos_y < self._size[1]:
             return True
 
     def stop_condition(self):

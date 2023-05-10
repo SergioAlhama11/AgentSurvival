@@ -417,6 +417,10 @@ def exit_from_laberinth(self, message=''):
             i['die_function'](self)
         if i['type'] == 'hole':
             i['die_function'](self)
+        if i['type'] == 'wind':
+            i['info'](self)
+        if i['type'] == 'stench':
+            i['info'](self)
 
     if walls['right'] == 0:
         self.turn_right()
@@ -820,7 +824,7 @@ def test_inOutLaberinth():
 
 
 def test_WumpusWorld():
-    lb1 = WumpusWorld(6, WumpusWorld, plot_run='every epoch', exit_at_border=False)
+    lb1 = WumpusWorld(10, WumpusWorld, plot_run='every epoch', exit_at_border=False)
 
     x = 1
     # lb1.create_agent('do nothing', do_nothing)
