@@ -413,24 +413,15 @@ def exit_from_laberinth(self, message=''):
     for i in objects:
         if i['type'] == 'exit':
             i['exit_function'](self)
-        if i['type'] == 'wumpus':
-            i['die_function'](self)
-        if i['type'] == 'hole':
-            i['die_function'](self)
         if i['type'] == 'wind':
-            i['info'](self)
+            print("HOYO CERCA")
         if i['type'] == 'stench':
-            i['info'](self)
-
+            print("WUMPUS CERCA")
     if walls['right'] == 0:
         self.turn_right()
         self.move_forward()
     elif walls['front'] == 0:
         self.move_forward()
-    #elif wumpus['front'] or wumpus['right'] or wumpus['left']:
-     #   print("ESTA EL WUMPUS CERCA!!!")
-    #elif hole['front'] or hole['right'] or hole['left']:
-     #   print("ESTA EL HOYO CERCA!!!")
     else:
         self.turn_left()
 
@@ -824,7 +815,7 @@ def test_inOutLaberinth():
 
 
 def test_WumpusWorld():
-    lb1 = WumpusWorld(10, WumpusWorld, plot_run='every epoch', exit_at_border=False)
+    lb1 = WumpusWorld(5, WumpusWorld, plot_run='every epoch', exit_at_border=False)
 
     x = 1
     # lb1.create_agent('do nothing', do_nothing)

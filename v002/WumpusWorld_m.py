@@ -1,5 +1,6 @@
 import math
 import sys
+import time
 from abc import ABC, abstractmethod
 from os import path
 
@@ -59,53 +60,27 @@ class WumpusWorld(Enviroment_with_agents):
         def __init__(self, pos_x, pos_y, environment):
             super().__init__(pos_x, pos_y, environment)
             self.__my_avatar = pl.imread(path.join("images", "wumpus.png"))
-            self.__is_alive = True
-
-        def is_alive(self):
-            if self.__is_alive:
-                return True
-            else:
-                self.__is_alive = False
-            return False
 
         def plot(self):
             pl.gca().imshow(self.__my_avatar,
                             extent=[self._pos_x + 0.2, self._pos_x + 0.8,
                                     self._pos_y + 0.2, self._pos_y + 0.8])
 
-        def _deathByWumpus(self, agent):
-            hiden_agent = self._environment._Enviroment_with_agents__get_hidden_agent(agent, self)
-            hiden_agent._check_and_increase_moves_per_turn()
-            position = hiden_agent._get_position()
-            if position[1] == self._pos_x and \
-                    position[0] == self._pos_y:
-                self._environment._died = True
-                self._environment._winner = None
-                hiden_agent._should_stop = True
-                hiden_agent._send_message({'type': 'unsuccess laberinth',
-                                           'Description': 'You died'})
-
         def _notify_time_iteration(self):
-            pass
+            agents = self._environment._Enviroment_with_agents__hidden_agents
+            for i in agents:
+                if agents[i]._Hidden_Agent__position[0] == self.pos_y and agents[i]._Hidden_Agent__position[1] == self.pos_x:
+                    agents[i].should_stop = True
+                    agents[i]._send_message({'type': 'Unsuccess laberinth',
+                                             'Description': 'You have died by the Wumpus'})
 
         def _get_info(self):
-            return {'type': 'wumpus', 'Description': 'Te has topado con el Wumpus y te ha deborado',
-                    'die_function': self._deathByWumpus}
+            return {'type': 'wumpus', 'Description': 'Te has topado con el Wumpus y te ha deborado'}
 
     class _Hole(Enviroment_with_agents._Object):
         def __init__(self, pos_x, pos_y, environment):
             super().__init__(pos_x, pos_y, environment)
             self.__my_avatar = pl.imread(path.join("images", "hoyo.png"))
-        def _deathByHole(self, agent):
-            hiden_agent = self._environment._Enviroment_with_agents__get_hidden_agent(agent, self)
-            position = hiden_agent._get_position()
-            if position[1] == self._pos_x and \
-                    position[0] == self._pos_y:
-                self._environment._died = True
-                self._environment._winner = None
-                hiden_agent._should_stop = True
-                hiden_agent._send_message({'type': 'unsuccess laberinth',
-                                           'Description': 'You died by a hole'})
 
         def plot(self):
             pl.gca().imshow(self.__my_avatar,
@@ -113,10 +88,17 @@ class WumpusWorld(Enviroment_with_agents):
                                     self._pos_y + 0.2, self._pos_y + 0.8])
 
         def _notify_time_iteration(self):
-            pass
+            agents = self._environment._Enviroment_with_agents__hidden_agents
+            for i in agents:
+                if agents[i]._Hidden_Agent__position[0] == self.pos_y and agents[i]._Hidden_Agent__position[1] == self.pos_x:
+                    agents[i].should_stop = True
+                    agents[i]._send_message({'type': 'unsuccess laberinth',
+                                             'Description': 'You have fallen into a hole'})
+                    time.sleep(10)
+                    return -1
 
         def _get_info(self):
-            return {'type': 'hole', 'Description': 'Has caido en un agujero', 'die_function': self._deathByHole}
+            return {'type': 'hole', 'Description': 'Has caido en un agujero'}
 
     class _Wind(Enviroment_with_agents._Object):
         def __init__(self, pos_x, pos_y, environment):
@@ -128,19 +110,8 @@ class WumpusWorld(Enviroment_with_agents):
                             extent=[self._pos_x + 0.2, self._pos_x + 0.8,
                                     self._pos_y + 0.2, self._pos_y + 0.8], alpha=0.5)
 
-        def wind(self, agent):
-            hiden_agent = self._environment._Enviroment_with_agents__get_hidden_agent(agent, self)
-            position = hiden_agent._get_position()
-            if position[1] == self._pos_x and \
-                    position[0] == self._pos_y:
-                hiden_agent._send_message({'type': 'wind',
-                                           'Description': 'There is a hole so close'})
-
-        def _notify_time_iteration(self):
-           pass
-
         def _get_info(self):
-            return {'type': 'wind', 'Description': 'Hay un agujero cerca', 'info': self.wind}
+            return {'type': 'wind', 'Description': 'Hay un agujero cerca'}
 
     class _Stench(Enviroment_with_agents._Object):
         def __init__(self, pos_x, pos_y, environment):
@@ -152,19 +123,8 @@ class WumpusWorld(Enviroment_with_agents):
                             extent=[self._pos_x + 0.2, self._pos_x + 0.8,
                                     self._pos_y + 0.2, self._pos_y + 0.8], alpha=0.5)
 
-        def stench(self, agent):
-            hiden_agent = self._environment._Enviroment_with_agents__get_hidden_agent(agent, self)
-            position = hiden_agent._get_position()
-            if position[1] == self._pos_x and \
-                    position[0] == self._pos_y:
-                hiden_agent._send_message({'type': 'stench',
-                                           'Description': 'There is a wumpus close'})
-
-        def _notify_time_iteration(self):
-            pass
-
         def _get_info(self):
-            return {'type': 'stench', 'Description': 'Está el wumpus cerca', 'info': self.stench}
+            return {'type': 'stench', 'Description': 'Está el wumpus cerca'}
 
     class _Treasure(_Exit):
         def __init__(self, pos_x, pos_y, environment):
@@ -201,8 +161,8 @@ class WumpusWorld(Enviroment_with_agents):
         pos_y = np.random.randint(self._size[1])
 
         num_wumpus = 1
-        # num_holes = 1
-        num_holes = np.random.randint(1, size / 2 - 1)
+        num_holes = 1
+        # num_holes = np.random.randint(1, size / 2 - 1)
 
         if self._entry_at_border:
             axis = np.random.choice([0, 1])
