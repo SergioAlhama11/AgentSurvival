@@ -1,5 +1,4 @@
 
-
 '''
 Esta clase tiene agentes (clase anterior) que se mueven en el laberinto. Los agentes tienen métodos para moverse hacia adelante
 y para girar a ambos lados.
@@ -225,15 +224,16 @@ class Enviroment_with_agents(Enviroment):
 
                 if self.is_active():
                     self._current_nutrients -= 1
-                    hiden_agent._increase_life(1)#self.__nutrients)
-                    hiden_agent._send_message({'type': 'life_bonus', 'amount': 1,#self.__nutrients,
+                    hiden_agent._increase_life(1  )  # self.__nutrients)
+                    hiden_agent._send_message({'type': 'life_bonus', 'amount': 1  ,  # self.__nutrients,
                                                'Description': 'You have been given ' +
-                                                              str(1) + #str(self.__nutrients) +
+                                                              str(1) +  # str(self.__nutrients) +
                                                               ' life points, because you have eaten food'})
                     return 1
                 else:
                     hiden_agent._send_message({'type': 'life_bonus', 'amount': 0,
-                                               'Description': 'You have been given ' + str(0) + ' life points, because you have eaten food'})
+                                               'Description': 'You have been given ' + str
+                                                   (0) + ' life points, because you have eaten food'})
                     return 0
 
         def _notify_time_iteration(self):
@@ -263,27 +263,30 @@ class Enviroment_with_agents(Enviroment):
         def __init__(self, name, laberinth, pos_x, pos_y, orientation, life, cmap, color):
             self.__position = [pos_x, pos_y]
             self.__orientation = orientation
-            self.__path = [tuple([self.__position[0]+0.5,self.__position[1]+0.5])]
+            self.__path = [tuple([self.__position[0 ] +0.5 ,self.__position[1 ] +0.5])]
             self.__laberinth = laberinth
             self._name = name
             self.__num_moves = 0
             self.__my_avatar = {}
             self.__my_avatar[Orientation.DOWN] = (pl.imread("images/Link.png") * 255.0).astype(np.uint8)
-            self.__my_avatar[Orientation.UP] = ndimage.rotate(self.__my_avatar[Orientation.DOWN],180)
-            self.__my_avatar[Orientation.LEFT] = ndimage.rotate(self.__my_avatar[Orientation.UP],90)
-            self.__my_avatar[Orientation.RIGHT] = ndimage.rotate(self.__my_avatar[Orientation.UP],270)
+            self.__my_avatar[Orientation.UP] = ndimage.rotate(self.__my_avatar[Orientation.DOWN] ,180)
+            self.__my_avatar[Orientation.LEFT] = ndimage.rotate(self.__my_avatar[Orientation.UP] ,90)
+            self.__my_avatar[Orientation.RIGHT] = ndimage.rotate(self.__my_avatar[Orientation.UP] ,270)
             self._life = life
             self._should_stop = False
             self._messages = []
             self._cmap = cmap
             self._color = color
+            self.__shoots = 1
 
-        def _send_message(self,message):
+        def _send_message(self ,message):
             self._messages.append(message)
 
         def _get_position(self):
             return self.__position
 
+        def _get_shoots(self):
+            return self.__shoots
         def _get_num_moves(self):
             return self.__num_moves
 
@@ -291,7 +294,7 @@ class Enviroment_with_agents(Enviroment):
             def inner(self):
                 f(self)
                 self._life -= 1
-                self._send_message({'type':'consuming move', 'Description': 'You have applied a move which consumes life, for instance moving forward',
+                self._send_message({'type' :'consuming move', 'Description': 'You have applied a move which consumes life, for instance moving forward',
                                     'amount': 1})
 
             return inner
@@ -301,7 +304,7 @@ class Enviroment_with_agents(Enviroment):
                 f(self)
 
                 if self.__laberinth._plot_run == 'always':
-                    blocking_printer.print('_and_plot is goint to check the semaphore')#, flush=True)
+                    blocking_printer.print('_and_plot is goint to check the semaphore'  )  # , flush=True)
 
                     # He puesto un semáforo, porque mandar excepciones a matplotlib me da problemas.
                     # Ahora, el mandar una excepción de Time_out va a pedir el semáforo antes de mandarla
@@ -309,13 +312,14 @@ class Enviroment_with_agents(Enviroment):
                     # manda la excepción ya ha pillado el semáforo, es decir, va a mandar la excepción,
                     # cancelo el dibujado con matplotlib
                     if self.__laberinth.semaphore_for_raising_Exception.acquire(blocking=False):
-                        blocking_printer.print('_and_plot got the semaphore and is goint to plot')#, flush=True)
+                        blocking_printer.print('_and_plot got the semaphore and is goint to plot'  )  # , flush=True)
                         self.__laberinth.plot(clear=True)
-                        blocking_printer.print('_and_plot plotted and is goint to release the semaphore')#, flush=True)
+                        blocking_printer.print \
+                            ('_and_plot plotted and is goint to release the semaphore'  )  # , flush=True)
                         self.__laberinth.semaphore_for_raising_Exception.release()
-                        blocking_printer.print('_and_plot released the semaphore')#, flush=True)
+                        blocking_printer.print('_and_plot released the semaphore'  )  # , flush=True)
                     else:
-                        blocking_printer.print('_and_plot did not get the semaphore')#, flush=True)
+                        blocking_printer.print('_and_plot did not get the semaphore'  )  # , flush=True)
             return inner
 
         def _check_and_increase_moves_per_turn(self, num_moves = 1):
@@ -334,7 +338,7 @@ class Enviroment_with_agents(Enviroment):
                     f(self)
                     # self._life -= 1
                 else:
-                    self._send_message({'type':'too much moves', 'Description': 'You have tried to do more moves than allowed per turn'})
+                    self._send_message({'type' :'too much moves', 'Description': 'You have tried to do more moves than allowed per turn'})
                     # print("Too much moves per turn")
                     raise TooMuchMovesPerTurn()
 
@@ -344,9 +348,9 @@ class Enviroment_with_agents(Enviroment):
             return self._life > 0 and not self._should_stop
 
         def _die_protected(f):
-            def inner(self,*args, **kwargs):
+            def inner(self ,*args, **kwargs):
                 if self._is_alive():
-                    return f(self,*args, **kwargs)
+                    return f(self ,*args, **kwargs)
             return inner
 
         def _update_path(self):
@@ -381,10 +385,11 @@ class Enviroment_with_agents(Enviroment):
                 return {'type': 'agent',
                         'Description': 'I am a friend, or... an enemy.\n'
                                        'So far, you can just ignore me or punch me. If you punch me, '
-                                       'you will consume ' + str(MOVES_PER_PUNCH) +' moves of your turn and will hurt me by one unit. Is it worthy?'
-                                       'To punch me, invoke the function in the field punch_function with yourself as argument:'
-                                       '<this_dictionary>[\'punch_function\'](self). You\'d be sent a message in case you'
-                                       'do it right. You would not, otherwise.',
+                                       'you will consume ' + str
+                            (MOVES_PER_PUNCH) +' moves of your turn and will hurt me by one unit. Is it worthy?'
+                                               'To punch me, invoke the function in the field punch_function with yourself as argument:'
+                                               '<this_dictionary>[\'punch_function\'](self). You\'d be sent a message in case you'
+                                               'do it right. You would not, otherwise.',
                         # 'This is a piece of food from a fixed source of food.'
                         #                                       ' You eat the food and 1) you get life points, and '
                         #                                       '2) in case you empty it, there will not be food for a number of epochs. '
@@ -398,7 +403,7 @@ class Enviroment_with_agents(Enviroment):
             else:
                 return None
 
-        def plot(self, length_path = -10):
+        def plot(self, length_path=-10):
             path_x = [j[1] for j in self.__path]
             path_y = [j[0] for j in self.__path]
             if self._life > 0:
@@ -410,18 +415,18 @@ class Enviroment_with_agents(Enviroment):
                 pl.plot(path_x[length_path:], path_y[length_path:], color=self._color)
             else:
                 pl.plot(path_x, path_y, color=self._color)
-            pl.plot(self.__position[1] + 0.5, self.__position[0] + 0.5, label= label, color=self._color)  # punto verde
-            #Avatars from: https://www.publicdomainpictures.net/en/view-image.php?image=70648&picture=avatars
+            pl.plot(self.__position[1] + 0.5, self.__position[0] + 0.5, label=label, color=self._color)  # punto verde
+            # Avatars from: https://www.publicdomainpictures.net/en/view-image.php?image=70648&picture=avatars
 
             if self._life > 0:
-                pl.gca().imshow(self.__my_avatar[self.__orientation],#[:,:,1],
+                pl.gca().imshow(self.__my_avatar[self.__orientation],  # [:,:,1],
                                 extent=[self.__position[1] + 0.1, self.__position[1] + 0.9,
                                         self.__position[0] + 0.1, self.__position[0] + 0.9], cmap=self._cmap)
             else:
-                pl.gca().imshow(self.__my_avatar[self.__orientation][:,:,1],
+                pl.gca().imshow(self.__my_avatar[self.__orientation][:, :, 1],
                                 extent=[self.__position[1] + 0.1, self.__position[1] + 0.9,
                                         self.__position[0] + 0.1, self.__position[0] + 0.9],
-                                cmap='gray',vmin=0,vmax=255)
+                                cmap='gray', vmin=0, vmax=255)
 
         def _wall_front_agent(self):
             x, y, orientation = self.__position[0], self.__position[1], self.__orientation
@@ -532,7 +537,7 @@ class Enviroment_with_agents(Enviroment):
                 else:
                     raise OrientationException(orientation)
 
-                self.__path.append(tuple([self.__position[0]+0.5,self.__position[1]+0.5]))
+                self.__path.append(tuple([self.__position[0] + 0.5, self.__position[1] + 0.5]))
             else:
                 self._send_message({'type': 'hit the wall',
                                     'Description': 'You have tried to move forward, but there is a wall.'})
@@ -559,20 +564,19 @@ class Enviroment_with_agents(Enviroment):
             self._messages.clear()
             return messages
 
-
-    def __init__(self, size, max_moves_per_turn = 7,
-                 no_adjacents_in_cluster = False,
-                 show_construction = False,
+    def __init__(self, size, max_moves_per_turn=7,
+                 no_adjacents_in_cluster=False,
+                 show_construction=False,
                  # entry_at_border = True,
                  # treasure_at_border = True,
-                 food_ratio = 0.05,
-                 food_period = 50,
-                 move_protection = True,
+                 food_ratio=0.05,
+                 food_period=50,
+                 move_protection=True,
                  remove_walls_prob=0,
-                 plot_run = 'every epoch'):
-        super().__init__(size, no_adjacents_in_cluster, show_construction, remove_walls_prob = remove_walls_prob)
-            # , entry_at_border,
-            #      treasure_at_border)
+                 plot_run='every epoch'):
+        super().__init__(size, no_adjacents_in_cluster, show_construction, remove_walls_prob=remove_walls_prob)
+        # , entry_at_border,
+        #      treasure_at_border)
         self._first_time = 0
         self.__hidden_agents = {}
         self.__outer_agents = {}
@@ -589,11 +593,11 @@ class Enviroment_with_agents(Enviroment):
             'YlOrBr', 'YlOrRd', 'OrRd', 'PuRd', 'RdPu', 'BuPu',
             'GnBu', 'PuBu', 'YlGnBu', 'PuBuGn', 'BuGn', 'YlGn']
         self.__possible_colors = ['tab:blue', 'tab:orange',
-                                 'tab:green',
-                                 'tab:red','tab:purple',
-                                 'tab:brown','tab:pink',
-                                 'tab:gray','tab:olive',
-                                 'tab:cyan']
+                                  'tab:green',
+                                  'tab:red', 'tab:purple',
+                                  'tab:brown', 'tab:pink',
+                                  'tab:gray', 'tab:olive',
+                                  'tab:cyan']
         self._plot_run = plot_run
 
         for i in range(self._size[0]):
@@ -610,6 +614,7 @@ class Enviroment_with_agents(Enviroment):
     Esta función se encarga de ejecutar f en la hebra principal, pero además corta su ejecución en caso
     de que se exceda un tiempo de ejecución
     '''
+
     def protect_inf_loop_v5(self, f, maxTime):
 
         father_finished = False
@@ -619,13 +624,15 @@ class Enviroment_with_agents(Enviroment):
         a la hebra principal. Esta función simplemente manda la excepción, y la ejecuta un temporizador del paquete
         threading 
         '''
+
         def send_me_an_exception(semaphore, notify_thread_id):
-            blocking_printer.print(send_me_an_exception.__name__, 'going to get the semaphore')#, flush=True)
+            blocking_printer.print(send_me_an_exception.__name__, 'going to get the semaphore')  # , flush=True)
 
             # Dado que mandar la excepción a la hebra principal a veces interfiere negativamente con algunas cosas
             # vamos a utilizar un semáforo
             if semaphore.acquire():
-                blocking_printer.print(send_me_an_exception.__name__, 'got the semaphore and going to send exception')#, flush=True)
+                blocking_printer.print(send_me_an_exception.__name__,
+                                       'got the semaphore and going to send exception')  # , flush=True)
 
                 # Una vez dentro del semáforo, enviaremos la excepción sólo si esta variable, global en la función que
                 # engloba a esta es Falso. Puede ocurrir que esta función se haya quedado esperando en el semáforo
@@ -635,8 +642,9 @@ class Enviroment_with_agents(Enviroment):
                     ctypes.pythonapi.PyThreadState_SetAsyncExc(ctypes.c_long(notify_thread_id),
                                                                ctypes.py_object(Time_out))
                 else:
-                    blocking_printer.print(send_me_an_exception.__name__, 'did not send the exception because father finished')#, flush=True)
-                blocking_printer.print(send_me_an_exception.__name__, 'going to release the semaphore')#, flush=True)
+                    blocking_printer.print(send_me_an_exception.__name__,
+                                           'did not send the exception because father finished')  # , flush=True)
+                blocking_printer.print(send_me_an_exception.__name__, 'going to release the semaphore')  # , flush=True)
                 semaphore.release()
                 # print(send_me_an_exception.__name__, 'released the semaphore', flush=True)
             else:
@@ -664,11 +672,12 @@ class Enviroment_with_agents(Enviroment):
                 # blocking_printer.print('protect_inf_loop is going to check the semaphore')#, flush=True)
                 if self.semaphore_for_raising_Exception.acquire(blocking=False):
                     father_finished = True
-                    blocking_printer.print('protect_inf_loop got the semaphore and is going to cancel the timer')#, flush=True)
+                    blocking_printer.print(
+                        'protect_inf_loop got the semaphore and is going to cancel the timer')  # , flush=True)
                     t.cancel()
-                    blocking_printer.print('protect_inf_loop is goint to release the semaphore')#, flush=True)
+                    blocking_printer.print('protect_inf_loop is goint to release the semaphore')  # , flush=True)
                     self.semaphore_for_raising_Exception.release()
-                    blocking_printer.print('protect_inf_loop released the semaphore')#, flush=True)
+                    blocking_printer.print('protect_inf_loop released the semaphore')  # , flush=True)
 
                 # Si no hemos podido coger el semáforo, es porque la hebra lo ha cogido y nos va a mandar la excepción
                 # simplemente tenemos que esperarla. No debe tardar.
@@ -706,9 +715,11 @@ class Enviroment_with_agents(Enviroment):
     En esta función, he introducido el parámetro who_ask para intentar evitar que algún agente intente
     localizar su representación interna en el laberinto
     '''
+
     def __get_hidden_agent(self, agent, who_ask):
-        if (isinstance(who_ask, self._Object) and who_ask in self.__objects_pointers) or\
-                isinstance(who_ask, self._Hidden_Agent) and agent in self.__outer_agent_ids:# and who_ask in self.__hidden_agents):
+        if (isinstance(who_ask, self._Object) and who_ask in self.__objects_pointers) or \
+                isinstance(who_ask,
+                           self._Hidden_Agent) and agent in self.__outer_agent_ids:  # and who_ask in self.__hidden_agents):
             id = self.__outer_agent_ids[agent]
             return self.__hidden_agents[id]
         else:
@@ -724,7 +735,7 @@ class Enviroment_with_agents(Enviroment):
 
         for i in self.__hidden_agents:
             agent = self.__hidden_agents[i]
-            if agent._Hidden_Agent__position == [y,x] and agent != who_ask:
+            if agent._Hidden_Agent__position == [y, x] and agent != who_ask:
                 info = agent._get_info()
                 if info is not None:
                     objects.append(info)
@@ -739,7 +750,7 @@ class Enviroment_with_agents(Enviroment):
 
         return new_name
 
-    def create_agent(self, name, move_method, pos_x = None, pos_y = None,
+    def create_agent(self, name, move_method, pos_x=None, pos_y=None,
                      orientation=None, life=None):
         agent_class = create_agent(move_method)
         if issubclass(agent_class, Agent):
@@ -754,8 +765,10 @@ class Enviroment_with_agents(Enviroment):
                 life = 10 * self._size[0] * self._size[1]
             an_agent = self._Hidden_Agent(name, self, pos_x, pos_y,
                                           orientation=orientation,
-                                          life= life, cmap=self.__posible_cmaps[len(self.__hidden_agents) % len(self.__posible_cmaps)],
-                                          color=self.__possible_colors[len(self.__hidden_agents) + 1 % len(self.__possible_colors)])
+                                          life=life, cmap=self.__posible_cmaps[
+                    len(self.__hidden_agents) % len(self.__posible_cmaps)],
+                                          color=self.__possible_colors[
+                                              len(self.__hidden_agents) + 1 % len(self.__possible_colors)])
             self.__hidden_agents[id] = an_agent
             new_agent = agent_class(
                 an_agent._move_forward_agent,
@@ -771,7 +784,7 @@ class Enviroment_with_agents(Enviroment):
         else:
             return None
 
-    def plot(self, clear=True, time_interval = 0.01, length_path=-10):
+    def plot(self, clear=True, time_interval=0.01, length_path=-10):
         if clear:
             self._clear_plot()
 
@@ -816,7 +829,7 @@ class Enviroment_with_agents(Enviroment):
             # print(num_cells_visited)
 
             self._epoch += 1
-        # for _ in range(1000):
+            # for _ in range(1000):
             for i in self.__hidden_agents:
                 an_agent = self.__hidden_agents[i]
                 an_agent._update_path()
@@ -849,20 +862,20 @@ class Enviroment_with_agents(Enviroment):
 
                     max_time_per_move = 0.1
                     try:
-                        self.protect_inf_loop_v5(an_agent.move,max_time_per_move)
+                        self.protect_inf_loop_v5(an_agent.move, max_time_per_move)
                     # Aquí debemos gestionar los dos tipos de excepciones que por ahora controlamos
                     # demasiados movimientos y demasiado tiempo. Para las demás, mastercard
                     except TooMuchMovesPerTurn as e:
-                        blocking_printer.print('**Too much moves')#, flush=True)
+                        blocking_printer.print('**Too much moves')  # , flush=True)
                         pass
                     except Time_out:
                         self.__hidden_agents[i]._send_message({'type': 'too slow',
-                                                              'Description': 'Your move function took more time than'
-                                                                             ' the allowed ' + str(max_time_per_move) +
-                                                              ' seconds and was interrupted'})
-                        blocking_printer.print('PARENT HAS BEEN KILLED')#, flush=True)
+                                                               'Description': 'Your move function took more time than'
+                                                                              ' the allowed ' + str(max_time_per_move) +
+                                                                              ' seconds and was interrupted'})
+                        blocking_printer.print('PARENT HAS BEEN KILLED')  # , flush=True)
                     except Exception as e:
-                        print('****************MASTERCARD*****:', e.__class__, ':', e,flush=True)
+                        print('****************MASTERCARD*****:', e.__class__, ':', e, flush=True)
                         raise
             else:
                 for i in self.__living_agent_ids:
@@ -884,9 +897,9 @@ class Enviroment_with_agents(Enviroment):
 
             # signal.alarm(0) # Esta línea protege de que no salte una alarma perdida. Creo que no es necesaria con el finally que he incluído en el protect_inf_moves_v4
             if self._plot_run == 'every epoch':
-                self.plot(clear=True,time_interval=time_interval)
+                self.plot(clear=True, time_interval=time_interval)
 
-        #TODO quizás quitar
+        # TODO quizás quitar
         # if not self._plot_run == 'never':
         #     pl.ioff()
         #     self._clear_plot()
@@ -896,6 +909,6 @@ class Enviroment_with_agents(Enviroment):
         # return self.get_winner()._name
         return {'winner': None if self.get_winner() is None else self.get_winner()._name,
                 'num_cells_visited': {self.__hidden_agents[i]._name:
-                                          len(np.unique([str(j[0])+str(j[1])
+                                          len(np.unique([str(j[0]) + str(j[1])
                                                          for j in self.__hidden_agents[i]._Hidden_Agent__path]))
                                       for i in self.__hidden_agents}}

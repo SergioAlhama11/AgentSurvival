@@ -27,8 +27,7 @@ class WumpusWorld(Enviroment_with_agents):
     class _Exit(Enviroment_with_agents._Object):
         def __init__(self, pos_x, pos_y, environment):
             super().__init__(pos_x, pos_y, environment)
-            self.__my_avatar = pl.imread(path.join("images",
-                                                   "exit_image.jpg"))  # https://www.rawpixel.com/image/5917811/exit-sign-free-public-domain-cc0-photo
+            self.__my_avatar = pl.imread(path.join("images", "exit_image.jpg"))  # https://www.rawpixel.com/image/5917811/exit-sign-free-public-domain-cc0-photo
 
         def _exit(self, agent):
             hiden_agent = self._environment._Enviroment_with_agents__get_hidden_agent(agent, self)
@@ -38,8 +37,7 @@ class WumpusWorld(Enviroment_with_agents):
                 self._environment._exit_found = True
                 self._environment._winner = hiden_agent
                 hiden_agent._should_stop = True
-                hiden_agent._send_message({'type': 'success laberinth',
-                                           'Description': 'You exited from the laberinth'})
+                hiden_agent._send_message({'type': 'success laberinth', 'Description': 'You exited from the laberinth'})
 
         def plot(self):
             # pl.plot(self._pos_x + 0.5, self._pos_y + 0.5, 'ro') #punto rojo
@@ -60,17 +58,60 @@ class WumpusWorld(Enviroment_with_agents):
         def __init__(self, pos_x, pos_y, environment):
             super().__init__(pos_x, pos_y, environment)
             self.__my_avatar = pl.imread(path.join("images", "wumpus.png"))
+            self.__my_avatar_2 = pl.imread(path.join("images", "wumpus2.png"))
+            self.__is_alive = True
+
+        def is_alive(self):
+            if self.__is_alive:
+                return True
+            else:
+                return False
 
         def plot(self):
-            pl.gca().imshow(self.__my_avatar,
-                            extent=[self._pos_x + 0.2, self._pos_x + 0.8,
-                                    self._pos_y + 0.2, self._pos_y + 0.8])
+            if self.is_alive():
+                pl.gca().imshow(self.__my_avatar,
+                                extent=[self._pos_x + 0.2, self._pos_x + 0.8,
+                                        self._pos_y + 0.2, self._pos_y + 0.8])
+            else:
+                pl.gca().imshow(self.__my_avatar_2,
+                                extent=[self._pos_x + 0.2, self._pos_x + 0.8,
+                                        self._pos_y + 0.2, self._pos_y + 0.8])
+
+        def shoot(self):
+            agents = self._environment._Enviroment_with_agents__hidden_agents
+            wumpus = WumpusWorld(5, WumpusWorld)
+
+            for i in agents:
+                shoots = agents[i]._get_shoots()
+                if shoots >= 1:
+                    if agents[i]._Hidden_Agent__position == [self.pos_y-1, self.pos_x] and not wumpus.exists_bottomWall(self.pos_x, self.pos_y) and agents[i]._Hidden_Agent__orientation == 0:
+                        shoots -= - 1
+                        self.__is_alive = False
+                        self._environment._winner = agents[i]
+                        agents[i]._should_stop = True
+                    elif agents[i]._Hidden_Agent__position == [self.pos_y+1, self.pos_x] and not wumpus.exists_upperWall(self.pos_x, self.pos_y) and agents[i]._Hidden_Agent__orientation == 2:
+                        shoots -= 1
+                        self.__is_alive = False
+                        self._environment._winner = agents[i]
+                        agents[i]._should_stop = True
+                    elif agents[i]._Hidden_Agent__position == [self.pos_y, self.pos_x-1] and not wumpus.exists_leftWall(self.pos_x, self.pos_y) and agents[i]._Hidden_Agent__orientation == 1:
+                        shoots -= 1
+                        self.__is_alive = False
+                        self._environment._winner = agents[i]
+                        agents[i]._should_stop = True
+                    elif agents[i]._Hidden_Agent__position == [self.pos_y, self.pos_x+1] and not wumpus.exists_rightWall(self.pos_x, self.pos_y) and agents[i]._Hidden_Agent__orientation == 3:
+                        shoots -= 1
+                        self.__is_alive = False
+                        self._environment._winner = agents[i]
+                        agents[i]._should_stop = True
+
 
         def _notify_time_iteration(self):
             agents = self._environment._Enviroment_with_agents__hidden_agents
+            self.shoot()
             for i in agents:
-                if agents[i]._Hidden_Agent__position[0] == self.pos_y and agents[i]._Hidden_Agent__position[1] == self.pos_x:
-                    agents[i].should_stop = True
+                if agents[i]._Hidden_Agent__position == [self.pos_y, self.pos_x]:
+                    agents[i]._should_stop = True
                     agents[i]._send_message({'type': 'Unsuccess laberinth',
                                              'Description': 'You have died by the Wumpus'})
 
@@ -90,12 +131,10 @@ class WumpusWorld(Enviroment_with_agents):
         def _notify_time_iteration(self):
             agents = self._environment._Enviroment_with_agents__hidden_agents
             for i in agents:
-                if agents[i]._Hidden_Agent__position[0] == self.pos_y and agents[i]._Hidden_Agent__position[1] == self.pos_x:
-                    agents[i].should_stop = True
+                if agents[i]._Hidden_Agent__position == [self.pos_y, self.pos_x]:
+                    agents[i]._should_stop = True
                     agents[i]._send_message({'type': 'unsuccess laberinth',
                                              'Description': 'You have fallen into a hole'})
-                    time.sleep(10)
-                    return -1
 
         def _get_info(self):
             return {'type': 'hole', 'Description': 'Has caido en un agujero'}
@@ -328,17 +367,3 @@ class WumpusWorld(Enviroment_with_agents):
                              self.entry.pos_x,
                              self._start_orientation,
                              life=life)
-
-
-class No_Walls_Laberinth(WumpusWorld):
-    def __init__(self, size, plot_run='every epoch', move_protection=True):
-        super().__init__(size, entry_at_border=False, exit_at_border=False,
-                         plot_run=plot_run,
-                         move_protection=move_protection)
-        self._h_panels = np.zeros(self._size)
-        self._v_panels = np.zeros(self._size)
-        self._h_panels[self._size[0] - 1, :] = 1
-        self._v_panels[:, self._size[1] - 1] = 1
-
-    def _initClusters(self):
-        return [], None, None

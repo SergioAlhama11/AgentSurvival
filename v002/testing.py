@@ -413,10 +413,6 @@ def exit_from_laberinth(self, message=''):
     for i in objects:
         if i['type'] == 'exit':
             i['exit_function'](self)
-        if i['type'] == 'wind':
-            print("HOYO CERCA")
-        if i['type'] == 'stench':
-            print("WUMPUS CERCA")
     if walls['right'] == 0:
         self.turn_right()
         self.move_forward()

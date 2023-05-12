@@ -2,8 +2,10 @@ import asyncio
 from abc import abstractmethod, ABC
 import numpy as np
 
+
 class Move_Finished_Exception(Exception):
     pass
+
 
 class Agent(ABC):
     def __init__(self,
@@ -12,7 +14,6 @@ class Agent(ABC):
                  turn_right_function,
                  whats_here_function,
                  read_messages_function):
-
         self.__move_forward_function = move_forward_function
         self.__turn_right_function = turn_right_function
         self.__turn_left_function = turn_left_function
@@ -75,6 +76,7 @@ class SimpleAgent(Agent):
 
     def move(self):
         self.move_randomly()
+
 
 def create_agent(move_function):
     class AgentCreator(Agent):
