@@ -27,16 +27,17 @@ class WumpusWorld(Enviroment_with_agents):
     class _Exit(Enviroment_with_agents._Object):
         def __init__(self, pos_x, pos_y, environment):
             super().__init__(pos_x, pos_y, environment)
-            self.__my_avatar = pl.imread(path.join("images", "exit_image.jpg"))  # https://www.rawpixel.com/image/5917811/exit-sign-free-public-domain-cc0-photo
+            self.__my_avatar = pl.imread(path.join("images",
+                                                   "exit_image.jpg"))  # https://www.rawpixel.com/image/5917811/exit-sign-free-public-domain-cc0-photo
 
         def _exit(self, agent):
             hiden_agent = self._environment._Enviroment_with_agents__get_hidden_agent(agent, self)
             position = hiden_agent._get_position()
             if position[1] == self._pos_x and \
                     position[0] == self._pos_y:
-                self._environment._exit_found = True
-                self._environment._winner = hiden_agent
-                hiden_agent._should_stop = True
+                # self._environment._exit_found = True
+                # self._environment._winner = hiden_agent
+                # hiden_agent._should_stop = True
                 hiden_agent._send_message({'type': 'success laberinth', 'Description': 'You exited from the laberinth'})
 
         def plot(self):
@@ -79,39 +80,53 @@ class WumpusWorld(Enviroment_with_agents):
 
         def shoot(self):
             agents = self._environment._Enviroment_with_agents__hidden_agents
-            wumpus = WumpusWorld(5, WumpusWorld)
-
             for i in agents:
                 shoots = agents[i]._get_shoots()
+                if agents[i]._arrow == True:
+                    shoots += 1
                 if shoots >= 1:
-                    if agents[i]._Hidden_Agent__position == [self.pos_y-1, self.pos_x] and not wumpus.exists_bottomWall(self.pos_x, self.pos_y) and agents[i]._Hidden_Agent__orientation == 0:
-                        shoots -= - 1
-                        self.__is_alive = False
-                        self._environment._winner = agents[i]
-                        agents[i]._should_stop = True
-                    elif agents[i]._Hidden_Agent__position == [self.pos_y+1, self.pos_x] and not wumpus.exists_upperWall(self.pos_x, self.pos_y) and agents[i]._Hidden_Agent__orientation == 2:
+                    # Disparar desde abajo
+                    if agents[i]._Hidden_Agent__position == [self.pos_y - 1, self.pos_x] and not self._environment.exists_bottomWall(self.pos_x, self.pos_y) and agents[i]._Hidden_Agent__orientation == Orientation.UP:
                         shoots -= 1
                         self.__is_alive = False
                         self._environment._winner = agents[i]
                         agents[i]._should_stop = True
-                    elif agents[i]._Hidden_Agent__position == [self.pos_y, self.pos_x-1] and not wumpus.exists_leftWall(self.pos_x, self.pos_y) and agents[i]._Hidden_Agent__orientation == 1:
+                    # Disparar desde arriba
+                    elif agents[i]._Hidden_Agent__position == [self.pos_y + 1, self.pos_x] and not self._environment.exists_upperWall(self.pos_x, self.pos_y) and agents[i]._Hidden_Agent__orientation == Orientation.DOWN:
                         shoots -= 1
                         self.__is_alive = False
                         self._environment._winner = agents[i]
                         agents[i]._should_stop = True
-                    elif agents[i]._Hidden_Agent__position == [self.pos_y, self.pos_x+1] and not wumpus.exists_rightWall(self.pos_x, self.pos_y) and agents[i]._Hidden_Agent__orientation == 3:
+                    # Disparar desde la izquierda
+                    elif agents[i]._Hidden_Agent__position == [self.pos_y, self.pos_x - 1] and not self._environment.exists_leftWall(self.pos_x, self.pos_y) and agents[i]._Hidden_Agent__orientation == Orientation.RIGHT:
                         shoots -= 1
                         self.__is_alive = False
                         self._environment._winner = agents[i]
                         agents[i]._should_stop = True
+                    # Disparar desde la derecha
+                    elif agents[i]._Hidden_Agent__position == [self.pos_y, self.pos_x + 1] and not self._environment.exists_rightWall(self.pos_x, self.pos_y) and agents[i]._Hidden_Agent__orientation == Orientation.LEFT:
+                        shoots -= 1
+                        self.__is_alive = False
+                        self._environment._winner = agents[i]
+                        agents[i]._should_stop = True
+                    '''else:
+                        print("-------------------")
+                        print("Posicion Wumpus: " + "[" + str(self.pos_x) + "," + str(self.pos_y) + "]")
+                        print("Posicion: " + str(agents[i]._Hidden_Agent__position))
+                        print("Se puede disparar por arriba? -> " + str(not self._environment.exists_upperWall(self.pos_x, self.pos_y)))
+                        print("Se puede disparar por abajo? -> " + str(not self._environment.exists_bottomWall(self.pos_x, self.pos_y)))
+                        print("Se puede disparar por la izq? -> " + str(not self._environment.exists_leftWall(self.pos_x, self.pos_y)))
+                        print("Se puede disparar por la dcha? -> " + str(not self._environment.exists_rightWall(self.pos_x, self.pos_y)))
+                        print("Orientacion: " + str(agents[i]._Hidden_Agent__orientation))
+                        print("-------------------")'''
 
 
         def _notify_time_iteration(self):
             agents = self._environment._Enviroment_with_agents__hidden_agents
             self.shoot()
             for i in agents:
-                if agents[i]._Hidden_Agent__position == [self.pos_y, self.pos_x]:
-                    agents[i]._should_stop = True
+                if agents[i]._Hidden_Agent__position == [self.pos_y, self.pos_x] and self.__is_alive == True:
+                    #agents[i]._should_stop = True
                     agents[i]._send_message({'type': 'Unsuccess laberinth',
                                              'Description': 'You have died by the Wumpus'})
 
@@ -132,7 +147,7 @@ class WumpusWorld(Enviroment_with_agents):
             agents = self._environment._Enviroment_with_agents__hidden_agents
             for i in agents:
                 if agents[i]._Hidden_Agent__position == [self.pos_y, self.pos_x]:
-                    agents[i]._should_stop = True
+                    # agents[i]._should_stop = True
                     agents[i]._send_message({'type': 'unsuccess laberinth',
                                              'Description': 'You have fallen into a hole'})
 
@@ -164,6 +179,36 @@ class WumpusWorld(Enviroment_with_agents):
 
         def _get_info(self):
             return {'type': 'stench', 'Description': 'Está el wumpus cerca'}
+
+    class _Arrow(Enviroment_with_agents._Object):
+        def __init__(self, pos_x, pos_y, environment):
+            super().__init__(pos_x, pos_y, environment)
+            self.__my_avatar = pl.imread(path.join("images", "arrow.png"))
+            self.__my_avatar2 = pl.imread(path.join("images", "transparent.png"))
+            self.__is_active = True
+
+        def is_active(self):
+            return self.__is_active
+
+        def _notify_time_iteration(self):
+            agents = self._environment._Enviroment_with_agents__hidden_agents
+            for i in agents:
+                if agents[i]._Hidden_Agent__position == [self.pos_y, self.pos_x] and self.is_active():
+                    self.__is_active = False
+                    agents[i]._arrow = True
+                    agents[i]._send_message({'type': 'arrow', 'Description': 'You have taken an arrow from the floor'})
+
+        def plot(self):
+            if self.is_active():
+                pl.gca().imshow(self.__my_avatar,
+                                extent=[self._pos_x + 0.2, self._pos_x + 0.8,
+                                        self._pos_y + 0.2, self._pos_y + 0.8], alpha=0.5)
+            else:
+                pl.gca().imshow(self.__my_avatar2,
+                                extent=[self._pos_x + 0.2, self._pos_x + 0.8,
+                                        self._pos_y + 0.2, self._pos_y + 0.8], alpha=0.5)
+        def _get_info(self):
+            return {'type': 'arrow', 'Description': 'Hay una flecha en el suelo'}
 
     class _Treasure(_Exit):
         def __init__(self, pos_x, pos_y, environment):
@@ -201,6 +246,7 @@ class WumpusWorld(Enviroment_with_agents):
 
         num_wumpus = 1
         num_holes = 1
+        num_arrow = 1
         # num_holes = np.random.randint(1, size / 2 - 1)
 
         if self._entry_at_border:
@@ -225,10 +271,14 @@ class WumpusWorld(Enviroment_with_agents):
             pos_x, pos_y = self.random_position()
             wumpus_pos_x, wumpus_pos_y = self.random_position()
             hole_pos_x, hole_pos_y = self.random_position()
+            arrow_pos_x, arrow_pos_y = self.random_position()
 
             if (pos_x, pos_y) != (wumpus_pos_x, wumpus_pos_y) and \
                     (pos_x, pos_y) != (hole_pos_x, hole_pos_y) and \
-                    (wumpus_pos_x, wumpus_pos_y) != (hole_pos_x, hole_pos_y):
+                    (pos_x, pos_y) != (arrow_pos_x, arrow_pos_y) and \
+                    (wumpus_pos_x, wumpus_pos_y) != (hole_pos_x, hole_pos_y) and \
+                    (wumpus_pos_x, wumpus_pos_y) != (arrow_pos_x, arrow_pos_y) and \
+                    (hole_pos_x, hole_pos_y) != (arrow_pos_x, arrow_pos_y):
                 break
 
         for i in range(num_wumpus):
@@ -241,7 +291,9 @@ class WumpusWorld(Enviroment_with_agents):
             self.addObject(hole, hole_pos_x, hole_pos_y)
             self.add_wind(hole_pos_x, hole_pos_y)
             hole_pos_x, hole_pos_y = self.random_position()
-
+        for i in range(num_arrow):
+            arrow = self._Arrow(arrow_pos_x, arrow_pos_y, self)
+            self.addObject(arrow, arrow_pos_x, arrow_pos_y)
         if exit_at_border != 'no exit':
             if self._exit_at_border:
                 axis = np.random.choice([0, 1])
@@ -357,12 +409,12 @@ class WumpusWorld(Enviroment_with_agents):
             np.max([num_cells_visited[i] for i in num_cells_visited]) >= self._size[0] * self._size[
                 1]  # (self._epoch > 10 * self._size[0] * self._size[1]) or self._exit_found
 
-    def create_agent(self, name, agent_class, life=None):
+    def create_agent(self, name, shoots, agent_class, life=None):
         if life is None and self._exit_at_border == 'no exit':
             life = 10 * self._size[0] * self._size[1]
         elif life is None:
             life = 10 * self._size[0] * self._size[1]
-        super().create_agent(name, agent_class,
+        super().create_agent(name, shoots, agent_class,
                              self.entry.pos_y,
                              self.entry.pos_x,
                              self._start_orientation,

@@ -820,7 +820,17 @@ def test_WumpusWorld():
         #lb1.create_agent('silly' + str(i+1), move_silly)
         #lb1.create_agent('Random' + str(i + 1), move_randomly)
         #lb1.create_agent('Smarter', exit_from_laberinth_complex_v2)#exit_from_laberinth_complex) #exit_from_laberinth)
-        lb1.create_agent('RightWall', exit_from_laberinth)
+        lb1.create_agent('RightWall', 1, exit_from_laberinth)
+    winner = lb1.run()
+
+    if winner is not None:
+        print("There was a winner: ", winner)
+
+
+def test_function():
+    lb1 = WumpusWorld(2, WumpusWorld, plot_run='every epoch', exit_at_border=False)
+
+    lb1.create_agent('RightWall', exit_from_laberinth)
     winner = lb1.run()
 
     if winner is not None:
@@ -1001,6 +1011,7 @@ if __name__ == '__main__':
 
         #test_inOutLaberinth()
         test_WumpusWorld()
+        #test_shoot_function()
         #test_inOutLaberinth_complex()
         # test_200inOutLaberingth()
 

@@ -1,4 +1,3 @@
-
 '''
 Esta clase tiene agentes (clase anterior) que se mueven en el laberinto. Los agentes tienen métodos para moverse hacia adelante
 y para girar a ambos lados.
@@ -78,17 +77,22 @@ try:
 
     if get_ipython().__class__.__name__ != 'NoneType':
         from IPython import display
+
         i_am_in_interatcive = True
         import pylab as pl
     else:
         import matplotlib.pyplot as pl
+
         i_am_in_interatcive = False
 except:
     import matplotlib.pyplot as pl
+
     i_am_in_interatcive = False
+
 
 class Time_out(Exception):
     pass
+
 
 class BlockingPrinter():
     def __init__(self):
@@ -101,7 +105,9 @@ class BlockingPrinter():
 
         pass
 
+
 blocking_printer = BlockingPrinter()
+
 
 # def sleeper(maxTime, intervalTime, notify_thread_id):
 #
@@ -156,7 +162,6 @@ blocking_printer = BlockingPrinter()
 
 
 class Enviroment_with_agents(Enviroment):
-
     class _Object(ABC):
         def __init__(self, pos_x, pos_y, environment):
             self._pos_x = pos_x
@@ -201,7 +206,6 @@ class Enviroment_with_agents(Enviroment):
             # No haya nutrientes o esté inactivo, se devuelve Falso
             return False
 
-
         def plot(self):
             if self.is_active():
                 # pl.plot(self._pos_x + 0.5, self._pos_y + 0.5, 'go', markersize=3)
@@ -215,17 +219,17 @@ class Enviroment_with_agents(Enviroment):
 
         def _eat(self, agent):
             hiden_agent = self._environment._Enviroment_with_agents__get_hidden_agent(agent, self)
-            hiden_agent._check_and_increase_moves_per_turn() # This line should stop this function with an exception if too much moves have been consumed
+            hiden_agent._check_and_increase_moves_per_turn()  # This line should stop this function with an exception if too much moves have been consumed
             position = hiden_agent._get_position()
             num_moves = hiden_agent._get_num_moves()
             if position[1] == self._pos_x and \
                     position[0] == self._pos_y:
-                    # and num_moves < self._environment._max_moves_per_turn:
+                # and num_moves < self._environment._max_moves_per_turn:
 
                 if self.is_active():
                     self._current_nutrients -= 1
-                    hiden_agent._increase_life(1  )  # self.__nutrients)
-                    hiden_agent._send_message({'type': 'life_bonus', 'amount': 1  ,  # self.__nutrients,
+                    hiden_agent._increase_life(1)  # self.__nutrients)
+                    hiden_agent._send_message({'type': 'life_bonus', 'amount': 1,  # self.__nutrients,
                                                'Description': 'You have been given ' +
                                                               str(1) +  # str(self.__nutrients) +
                                                               ' life points, because you have eaten food'})
@@ -233,7 +237,7 @@ class Enviroment_with_agents(Enviroment):
                 else:
                     hiden_agent._send_message({'type': 'life_bonus', 'amount': 0,
                                                'Description': 'You have been given ' + str
-                                                   (0) + ' life points, because you have eaten food'})
+                                               (0) + ' life points, because you have eaten food'})
                     return 0
 
         def _notify_time_iteration(self):
@@ -247,39 +251,40 @@ class Enviroment_with_agents(Enviroment):
             if self.is_active():
                 return {'type': 'food type 1',
                         'Description': 'This is a piece of food from a fixed source of food.'
-                                                              ' You eat the food and 1) you get life points, and '
-                                                              '2) in case you empty it, there will not be food for a number of epochs. '
-                                                              'To eat it, you have to '
-                                                              'invoke the function in the field eat_function with yourself as argument:'
-                                                              '<this_dictionary>[\'eat_function\'](self). You\'d be sent a message '
-                                                              'about the life_bonus in '
-                                                              'case you do it right, You would not, otherwise. In addition,'
+                                       ' You eat the food and 1) you get life points, and '
+                                       '2) in case you empty it, there will not be food for a number of epochs. '
+                                       'To eat it, you have to '
+                                       'invoke the function in the field eat_function with yourself as argument:'
+                                       '<this_dictionary>[\'eat_function\'](self). You\'d be sent a message '
+                                       'about the life_bonus in '
+                                       'case you do it right, You would not, otherwise. In addition,'
                                        'this function returns 1 in case of success, or 0 in case there is not more food',
                         'eat_function': self._eat}
             else:
                 return None
 
     class _Hidden_Agent:
-        def __init__(self, name, laberinth, pos_x, pos_y, orientation, life, cmap, color):
+        def __init__(self, name, shoots, laberinth, pos_x, pos_y, orientation, life, cmap, color):
             self.__position = [pos_x, pos_y]
             self.__orientation = orientation
-            self.__path = [tuple([self.__position[0 ] +0.5 ,self.__position[1 ] +0.5])]
+            self.__path = [tuple([self.__position[0] + 0.5, self.__position[1] + 0.5])]
             self.__laberinth = laberinth
             self._name = name
             self.__num_moves = 0
             self.__my_avatar = {}
             self.__my_avatar[Orientation.DOWN] = (pl.imread("images/Link.png") * 255.0).astype(np.uint8)
-            self.__my_avatar[Orientation.UP] = ndimage.rotate(self.__my_avatar[Orientation.DOWN] ,180)
-            self.__my_avatar[Orientation.LEFT] = ndimage.rotate(self.__my_avatar[Orientation.UP] ,90)
-            self.__my_avatar[Orientation.RIGHT] = ndimage.rotate(self.__my_avatar[Orientation.UP] ,270)
+            self.__my_avatar[Orientation.UP] = ndimage.rotate(self.__my_avatar[Orientation.DOWN], 180)
+            self.__my_avatar[Orientation.LEFT] = ndimage.rotate(self.__my_avatar[Orientation.UP], 90)
+            self.__my_avatar[Orientation.RIGHT] = ndimage.rotate(self.__my_avatar[Orientation.UP], 270)
             self._life = life
             self._should_stop = False
             self._messages = []
             self._cmap = cmap
             self._color = color
-            self.__shoots = 1
+            self._arrow = False
+            self.__shoots = shoots
 
-        def _send_message(self ,message):
+        def _send_message(self, message):
             self._messages.append(message)
 
         def _get_position(self):
@@ -287,6 +292,7 @@ class Enviroment_with_agents(Enviroment):
 
         def _get_shoots(self):
             return self.__shoots
+
         def _get_num_moves(self):
             return self.__num_moves
 
@@ -294,7 +300,8 @@ class Enviroment_with_agents(Enviroment):
             def inner(self):
                 f(self)
                 self._life -= 1
-                self._send_message({'type' :'consuming move', 'Description': 'You have applied a move which consumes life, for instance moving forward',
+                self._send_message({'type': 'consuming move',
+                                    'Description': 'You have applied a move which consumes life, for instance moving forward',
                                     'amount': 1})
 
             return inner
@@ -304,7 +311,7 @@ class Enviroment_with_agents(Enviroment):
                 f(self)
 
                 if self.__laberinth._plot_run == 'always':
-                    blocking_printer.print('_and_plot is goint to check the semaphore'  )  # , flush=True)
+                    blocking_printer.print('_and_plot is goint to check the semaphore')  # , flush=True)
 
                     # He puesto un semáforo, porque mandar excepciones a matplotlib me da problemas.
                     # Ahora, el mandar una excepción de Time_out va a pedir el semáforo antes de mandarla
@@ -312,17 +319,18 @@ class Enviroment_with_agents(Enviroment):
                     # manda la excepción ya ha pillado el semáforo, es decir, va a mandar la excepción,
                     # cancelo el dibujado con matplotlib
                     if self.__laberinth.semaphore_for_raising_Exception.acquire(blocking=False):
-                        blocking_printer.print('_and_plot got the semaphore and is goint to plot'  )  # , flush=True)
+                        blocking_printer.print('_and_plot got the semaphore and is goint to plot')  # , flush=True)
                         self.__laberinth.plot(clear=True)
                         blocking_printer.print \
-                            ('_and_plot plotted and is goint to release the semaphore'  )  # , flush=True)
+                            ('_and_plot plotted and is goint to release the semaphore')  # , flush=True)
                         self.__laberinth.semaphore_for_raising_Exception.release()
-                        blocking_printer.print('_and_plot released the semaphore'  )  # , flush=True)
+                        blocking_printer.print('_and_plot released the semaphore')  # , flush=True)
                     else:
-                        blocking_printer.print('_and_plot did not get the semaphore'  )  # , flush=True)
+                        blocking_printer.print('_and_plot did not get the semaphore')  # , flush=True)
+
             return inner
 
-        def _check_and_increase_moves_per_turn(self, num_moves = 1):
+        def _check_and_increase_moves_per_turn(self, num_moves=1):
             if self.__num_moves + num_moves <= self.__laberinth._max_moves_per_turn:
                 self.__num_moves += num_moves
             else:
@@ -338,7 +346,8 @@ class Enviroment_with_agents(Enviroment):
                     f(self)
                     # self._life -= 1
                 else:
-                    self._send_message({'type' :'too much moves', 'Description': 'You have tried to do more moves than allowed per turn'})
+                    self._send_message({'type': 'too much moves',
+                                        'Description': 'You have tried to do more moves than allowed per turn'})
                     # print("Too much moves per turn")
                     raise TooMuchMovesPerTurn()
 
@@ -348,9 +357,10 @@ class Enviroment_with_agents(Enviroment):
             return self._life > 0 and not self._should_stop
 
         def _die_protected(f):
-            def inner(self ,*args, **kwargs):
+            def inner(self, *args, **kwargs):
                 if self._is_alive():
-                    return f(self ,*args, **kwargs)
+                    return f(self, *args, **kwargs)
+
             return inner
 
         def _update_path(self):
@@ -360,10 +370,10 @@ class Enviroment_with_agents(Enviroment):
             hiden_agent = self.__laberinth._Enviroment_with_agents__get_hidden_agent(agent, self)
 
             if hiden_agent is not None:
-                if self.__laberinth._Enviroment_with_agents__outer_agent_ids[agent] ==\
+                if self.__laberinth._Enviroment_with_agents__outer_agent_ids[agent] == \
                         self.__laberinth._Enviroment_with_agents__id_current_turn:
 
-                    hiden_agent._check_and_increase_moves_per_turn(MOVES_PER_PUNCH) # Three turns per punch
+                    hiden_agent._check_and_increase_moves_per_turn(MOVES_PER_PUNCH)  # Three turns per punch
 
                     if hiden_agent._get_position() == self._get_position() and self._is_alive() and hiden_agent._is_alive():
                         self._increase_life(-1)
@@ -386,10 +396,10 @@ class Enviroment_with_agents(Enviroment):
                         'Description': 'I am a friend, or... an enemy.\n'
                                        'So far, you can just ignore me or punch me. If you punch me, '
                                        'you will consume ' + str
-                            (MOVES_PER_PUNCH) +' moves of your turn and will hurt me by one unit. Is it worthy?'
-                                               'To punch me, invoke the function in the field punch_function with yourself as argument:'
-                                               '<this_dictionary>[\'punch_function\'](self). You\'d be sent a message in case you'
-                                               'do it right. You would not, otherwise.',
+                                       (MOVES_PER_PUNCH) + ' moves of your turn and will hurt me by one unit. Is it worthy?'
+                                                           'To punch me, invoke the function in the field punch_function with yourself as argument:'
+                                                           '<this_dictionary>[\'punch_function\'](self). You\'d be sent a message in case you'
+                                                           'do it right. You would not, otherwise.',
                         # 'This is a piece of food from a fixed source of food.'
                         #                                       ' You eat the food and 1) you get life points, and '
                         #                                       '2) in case you empty it, there will not be food for a number of epochs. '
@@ -750,7 +760,7 @@ class Enviroment_with_agents(Enviroment):
 
         return new_name
 
-    def create_agent(self, name, move_method, pos_x=None, pos_y=None,
+    def create_agent(self, name, shoots, move_method, pos_x=None, pos_y=None,
                      orientation=None, life=None):
         agent_class = create_agent(move_method)
         if issubclass(agent_class, Agent):
@@ -763,7 +773,7 @@ class Enviroment_with_agents(Enviroment):
                 orientation = Orientation.UP
             if life is None:
                 life = 10 * self._size[0] * self._size[1]
-            an_agent = self._Hidden_Agent(name, self, pos_x, pos_y,
+            an_agent = self._Hidden_Agent(name, shoots, self, pos_x, pos_y,
                                           orientation=orientation,
                                           life=life, cmap=self.__posible_cmaps[
                     len(self.__hidden_agents) % len(self.__posible_cmaps)],
