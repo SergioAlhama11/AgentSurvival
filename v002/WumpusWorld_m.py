@@ -38,7 +38,7 @@ class WumpusWorld(Enviroment_with_agents):
                 # self._environment._exit_found = True
                 # self._environment._winner = hiden_agent
                 # hiden_agent._should_stop = True
-                hiden_agent._send_message({'type': 'success laberinth', 'Description': 'You exited from the laberinth'})
+                hiden_agent._send_message({'type': 'success laberinth',  'Description': 'You exited from the laberinth'})
 
         def plot(self):
             # pl.plot(self._pos_x + 0.5, self._pos_y + 0.5, 'ro') #punto rojo
@@ -54,6 +54,7 @@ class WumpusWorld(Enviroment_with_agents):
                                                    ' in '
                                                    'case you do it right. You would not, otherwise',
                     'exit_function': self._exit}
+
 
     class _Wumpus(Enviroment_with_agents._Object):
         def __init__(self, pos_x, pos_y, environment):
@@ -82,34 +83,35 @@ class WumpusWorld(Enviroment_with_agents):
             agents = self._environment._Enviroment_with_agents__hidden_agents
             for i in agents:
                 shoots = agents[i]._get_shoots()
-                if agents[i]._arrow == True:
+                successful_shot = False
+                if agents[i]._arrow:
                     shoots += 1
                 if shoots >= 1:
+                    position_above = [self.pos_y - 1, self.pos_x]
+                    position_below = [self.pos_y + 1, self.pos_x]
+                    position_left = [self.pos_y, self.pos_x - 1]
+                    position_right = [self.pos_y, self.pos_x + 1]
+
                     # Disparar desde abajo
-                    if agents[i]._Hidden_Agent__position == [self.pos_y - 1, self.pos_x] and not self._environment.exists_bottomWall(self.pos_x, self.pos_y) and agents[i]._Hidden_Agent__orientation == Orientation.UP:
-                        shoots -= 1
-                        self.__is_alive = False
-                        self._environment._winner = agents[i]
-                        agents[i]._should_stop = True
+                    if agents[i]._Hidden_Agent__position == position_above and not self._environment.exists_bottomWall(self.pos_x, self.pos_y) and agents[i]._Hidden_Agent__orientation == Orientation.UP:
+                        successful_shot = True
                     # Disparar desde arriba
-                    elif agents[i]._Hidden_Agent__position == [self.pos_y + 1, self.pos_x] and not self._environment.exists_upperWall(self.pos_x, self.pos_y) and agents[i]._Hidden_Agent__orientation == Orientation.DOWN:
-                        shoots -= 1
-                        self.__is_alive = False
-                        self._environment._winner = agents[i]
-                        agents[i]._should_stop = True
+                    elif agents[i]._Hidden_Agent__position == position_below and not self._environment.exists_upperWall(self.pos_x, self.pos_y) and agents[i]._Hidden_Agent__orientation == Orientation.DOWN:
+                        successful_shot = True
                     # Disparar desde la izquierda
-                    elif agents[i]._Hidden_Agent__position == [self.pos_y, self.pos_x - 1] and not self._environment.exists_leftWall(self.pos_x, self.pos_y) and agents[i]._Hidden_Agent__orientation == Orientation.RIGHT:
-                        shoots -= 1
-                        self.__is_alive = False
-                        self._environment._winner = agents[i]
-                        agents[i]._should_stop = True
+                    elif agents[i]._Hidden_Agent__position == position_left and not self._environment.exists_leftWall(self.pos_x, self.pos_y) and agents[i]._Hidden_Agent__orientation == Orientation.RIGHT:
+                        successful_shot = True
                     # Disparar desde la derecha
-                    elif agents[i]._Hidden_Agent__position == [self.pos_y, self.pos_x + 1] and not self._environment.exists_rightWall(self.pos_x, self.pos_y) and agents[i]._Hidden_Agent__orientation == Orientation.LEFT:
-                        shoots -= 1
-                        self.__is_alive = False
-                        self._environment._winner = agents[i]
-                        agents[i]._should_stop = True
+                    elif agents[i]._Hidden_Agent__position == position_right and not self._environment.exists_rightWall(self.pos_x, self.pos_y) and agents[i]._Hidden_Agent__orientation == Orientation.LEFT:
+                        successful_shot = True
+
+                if successful_shot:
+                    shoots -= 1
+                    self.__is_alive = False
+                    self._environment._winner = agents[i]
+                    agents[i]._should_stop = True
                     '''else:
+                        #time.sleep(0.5)
                         print("-------------------")
                         print("Posicion Wumpus: " + "[" + str(self.pos_x) + "," + str(self.pos_y) + "]")
                         print("Posicion: " + str(agents[i]._Hidden_Agent__position))
@@ -125,7 +127,7 @@ class WumpusWorld(Enviroment_with_agents):
             agents = self._environment._Enviroment_with_agents__hidden_agents
             self.shoot()
             for i in agents:
-                if agents[i]._Hidden_Agent__position == [self.pos_y, self.pos_x] and self.__is_alive == True:
+                if agents[i]._Hidden_Agent__position == [self.pos_y, self.pos_x] and self.__is_alive:
                     #agents[i]._should_stop = True
                     agents[i]._send_message({'type': 'Unsuccess laberinth',
                                              'Description': 'You have died by the Wumpus'})
