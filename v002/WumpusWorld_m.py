@@ -35,13 +35,13 @@ class WumpusWorld(Enviroment_with_agents):
             position = hiden_agent._get_position()
             if position[1] == self._pos_x and \
                     position[0] == self._pos_y:
-                # self._environment._exit_found = True
-                # self._environment._winner = hiden_agent
-                # hiden_agent._should_stop = True
+                self._environment._exit_found = True
+                self._environment._winner = hiden_agent
+                hiden_agent._should_stop = True
                 hiden_agent._send_message({'type': 'success laberinth',  'Description': 'You exited from the laberinth'})
 
         def plot(self):
-            # pl.plot(self._pos_x + 0.5, self._pos_y + 0.5, 'ro') #punto rojo
+            pl.plot(self._pos_x + 0.5, self._pos_y + 0.5, 'ro') #punto rojo
             pl.gca().imshow(self.__my_avatar,
                             extent=[self._pos_x + 0.1, self._pos_x + 0.9,
                                     self._pos_y + 0.1, self._pos_y + 0.9])
@@ -128,7 +128,7 @@ class WumpusWorld(Enviroment_with_agents):
             self.shoot()
             for i in agents:
                 if agents[i]._Hidden_Agent__position == [self.pos_y, self.pos_x] and self.__is_alive:
-                    #agents[i]._should_stop = True
+                    agents[i]._should_stop = True
                     agents[i]._send_message({'type': 'Unsuccess laberinth',
                                              'Description': 'You have died by the Wumpus'})
 
@@ -149,7 +149,7 @@ class WumpusWorld(Enviroment_with_agents):
             agents = self._environment._Enviroment_with_agents__hidden_agents
             for i in agents:
                 if agents[i]._Hidden_Agent__position == [self.pos_y, self.pos_x]:
-                    # agents[i]._should_stop = True
+                    agents[i]._should_stop = True
                     agents[i]._send_message({'type': 'unsuccess laberinth',
                                              'Description': 'You have fallen into a hole'})
 
