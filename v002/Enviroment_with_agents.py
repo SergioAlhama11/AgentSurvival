@@ -760,7 +760,7 @@ class Enviroment_with_agents(Enviroment):
 
         return new_name
 
-    def create_agent(self, name, shoots, move_method, pos_x=None, pos_y=None,
+    def create_agent(self, agent, name, shoots, move_method, pos_x=None, pos_y=None,
                      orientation=None, life=None):
         agent_class = create_agent(move_method)
         if issubclass(agent_class, Agent):
@@ -773,19 +773,25 @@ class Enviroment_with_agents(Enviroment):
                 orientation = Orientation.UP
             if life is None:
                 life = 10 * self._size[0] * self._size[1]
-            an_agent = self._Hidden_Agent(name, shoots, self, pos_x, pos_y,
+            agent2 = agent(name, shoots, self, pos_x, pos_y,
                                           orientation=orientation,
                                           life=life, cmap=self.__posible_cmaps[
                     len(self.__hidden_agents) % len(self.__posible_cmaps)],
                                           color=self.__possible_colors[
                                               len(self.__hidden_agents) + 1 % len(self.__possible_colors)])
-            self.__hidden_agents[id] = an_agent
+            '''an_agent = self._Hidden_Agent(name, shoots, self, pos_x, pos_y,
+                                          orientation=orientation,
+                                          life=life, cmap=self.__posible_cmaps[
+                    len(self.__hidden_agents) % len(self.__posible_cmaps)],
+                                          color=self.__possible_colors[
+                                              len(self.__hidden_agents) + 1 % len(self.__possible_colors)])'''
+            self.__hidden_agents[id] = agent2
             new_agent = agent_class(
-                an_agent._move_forward_agent,
-                an_agent._turn_left_agent,
-                an_agent._turn_right_agent,
-                an_agent._whats_here,
-                an_agent._read_messages)
+                agent2._move_forward_agent,
+                agent2._turn_left_agent,
+                agent2._turn_right_agent,
+                agent2._whats_here,
+                agent2._read_messages, agent2.shoot)
             self.__outer_agents[id] = new_agent
             self.__outer_agent_ids[new_agent] = id
             self.__living_agent_ids.add(id)

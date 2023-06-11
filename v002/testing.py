@@ -413,6 +413,11 @@ def exit_from_laberinth(self, message=''):
     for i in objects:
         if i['type'] == 'exit':
             i['exit_function'](self)
+        if i['type'] == 'stench':
+            self.shoot_function()
+
+
+    #self.shoot_function()
     if walls['right'] == 0:
         self.turn_right()
         self.move_forward()
@@ -420,6 +425,7 @@ def exit_from_laberinth(self, message=''):
         self.move_forward()
     else:
         self.turn_left()
+
 
     messages = self.read_messages()
     if len(messages) > 0:
