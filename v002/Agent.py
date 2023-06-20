@@ -36,7 +36,7 @@ class Agent(ABC):
     def whats_here(self):
         return self._whats_here_function()
 
-    def shoot_function(self):
+    def shoot(self):
         return self._shoot_function()
 
     @abstractmethod
