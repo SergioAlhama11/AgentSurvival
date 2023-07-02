@@ -282,7 +282,7 @@ class Enviroment_with_agents(Enviroment):
             self._cmap = cmap
             self._color = color
             self._arrow = False
-            self.__shoots = shoots
+            self._shoots = shoots
 
         def _send_message(self, message):
             self._messages.append(message)
@@ -290,8 +290,11 @@ class Enviroment_with_agents(Enviroment):
         def _get_position(self):
             return self.__position
 
-        def _get_shoots(self):
-            return self.__shoots
+        def get_orientation(self):
+            return self.__orientation
+
+        def get_shoots(self):
+            return self._shoots
 
         def _get_num_moves(self):
             return self.__num_moves
@@ -791,7 +794,7 @@ class Enviroment_with_agents(Enviroment):
                 agent2._turn_left_agent,
                 agent2._turn_right_agent,
                 agent2._whats_here,
-                agent2._read_messages, agent2.shoot)
+                agent2._read_messages, agent2.shoot, agent2.take_arrow)
             self.__outer_agents[id] = new_agent
             self.__outer_agent_ids[new_agent] = id
             self.__living_agent_ids.add(id)

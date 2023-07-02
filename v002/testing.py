@@ -413,11 +413,54 @@ def exit_from_laberinth(self, message=''):
     for i in objects:
         if i['type'] == 'exit':
             i['exit_function'](self)
+        if i['type'] == 'arrow':
+            self.take_arrow()
+        if i['type'] == 'noshoots':
+            print("No hay disparos suficientes")
         if i['type'] == 'stench':
-            self.shoot_function()
+            self.shoot()
+            '''if walls['front'] == 0 and walls['right'] == 0 and walls['left'] == 0:
+                self.shoot()
+                self.turn_left()
+                self.shoot()
+                self.turn_left()
+                self.turn_left()
+                self.shoot()
+            if walls['front'] == 0 and walls['right'] == 0 and walls['left'] == 1:
+                self.shoot()
+                self.turn_right()
+                self.shoot()
+            if walls['front'] == 0 and walls['right'] == 1 and walls['left'] == 0:
+                self.shoot()
+                self.turn_left()
+                self.shoot()
+            if walls['front'] == 0 and walls['right'] == 1 and walls['left'] == 1:
+                self.shoot()
+            if walls['front'] == 1 and walls['right'] == 0 and walls['left'] == 0:
+                self.turn_right()
+                self.shoot()
+                self.turn_right()
+                self.turn_right()
+                self.shoot()
+            if walls['front'] == 1 and walls['right'] == 0 and walls['left'] == 1:
+                self.turn_right()
+                self.shoot()
+            if walls['front'] == 1 and walls['right'] == 1 and walls['left'] == 0:
+                self.turn_left()
+                self.shoot()
+            if walls['front'] == 1 and walls['right'] == 1 and walls['left'] == 1:
+                print("No puedo disparar")'''
+
+        '''if i['type'] == 'wind':
+            self.turn_right()
+            self.turn_right()
+            self.turn_right()
+            if walls['front'] == 1:
+                self.turn_right()'''
+            #self.shoot()
 
 
-    #self.shoot_function()
+
     if walls['right'] == 0:
         self.turn_right()
         self.move_forward()
@@ -817,7 +860,7 @@ def test_inOutLaberinth():
 
 
 def test_WumpusWorld():
-    lb1 = WumpusWorld(5, WumpusWorld, plot_run='every epoch', exit_at_border=False)
+    lb1 = WumpusWorld(6, WumpusWorld, plot_run='every epoch', exit_at_border=False)
 
     x = 1
     # lb1.create_agent('do nothing', do_nothing)
