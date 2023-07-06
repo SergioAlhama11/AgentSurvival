@@ -12,11 +12,13 @@ class Agent(ABC):
                  move_forward_function,
                  turn_left_function,
                  turn_right_function,
+                 stop_function,
                  whats_here_function,
                  read_messages_function, shoot_function, take_arrow_function):
         self.__move_forward_function = move_forward_function
         self.__turn_right_function = turn_right_function
         self.__turn_left_function = turn_left_function
+        self.__stop_function = stop_function
         self._whats_here_function = whats_here_function
         self._read_messages_function = read_messages_function
         self._shoot_function = shoot_function
@@ -30,6 +32,9 @@ class Agent(ABC):
 
     def move_forward(self):
         self.__move_forward_function()
+
+    def stop(self):
+        self.__stop_function()
 
     def read_messages(self):
         return self._read_messages_function()
@@ -93,6 +98,7 @@ def create_agent(move_function):
                      move_forward_function,
                      turn_left_function,
                      turn_right_function,
+                     stop_function,
                      whats_here_function,
                      read_messages_function,
                      shoot_function,
@@ -101,6 +107,7 @@ def create_agent(move_function):
                 move_forward_function,
                 turn_left_function,
                 turn_right_function,
+                stop_function,
                 whats_here_function, read_messages_function, shoot_function, take_arrow_function)
 
         def move(self):

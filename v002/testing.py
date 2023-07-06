@@ -415,52 +415,22 @@ def exit_from_laberinth(self, message=''):
             i['exit_function'](self)
         if i['type'] == 'arrow':
             self.take_arrow()
-        if i['type'] == 'noshoots':
-            print("No hay disparos suficientes")
-        if i['type'] == 'stench':
-            self.shoot()
-            '''if walls['front'] == 0 and walls['right'] == 0 and walls['left'] == 0:
-                self.shoot()
-                self.turn_left()
-                self.shoot()
-                self.turn_left()
-                self.turn_left()
-                self.shoot()
-            if walls['front'] == 0 and walls['right'] == 0 and walls['left'] == 1:
-                self.shoot()
-                self.turn_right()
-                self.shoot()
-            if walls['front'] == 0 and walls['right'] == 1 and walls['left'] == 0:
-                self.shoot()
-                self.turn_left()
-                self.shoot()
-            if walls['front'] == 0 and walls['right'] == 1 and walls['left'] == 1:
-                self.shoot()
-            if walls['front'] == 1 and walls['right'] == 0 and walls['left'] == 0:
-                self.turn_right()
-                self.shoot()
-                self.turn_right()
-                self.turn_right()
-                self.shoot()
-            if walls['front'] == 1 and walls['right'] == 0 and walls['left'] == 1:
-                self.turn_right()
-                self.shoot()
-            if walls['front'] == 1 and walls['right'] == 1 and walls['left'] == 0:
-                self.turn_left()
-                self.shoot()
-            if walls['front'] == 1 and walls['right'] == 1 and walls['left'] == 1:
-                print("No puedo disparar")'''
+        '''if i['type'] == 'stench':
+            if walls['front'] == 0:
+                self.shoot()'''
 
-        '''if i['type'] == 'wind':
+        if i['type'] == 'wind':
             self.turn_right()
             self.turn_right()
-            self.turn_right()
-            if walls['front'] == 1:
-                self.turn_right()'''
-            #self.shoot()
-
-
-
+            if walls['right'] == 0 and walls['front'] == 0:
+                self.move_forward()
+                print("OOO")
+            if walls['right'] == 0:
+                self.turn_left()
+                print("EEE")
+                #self.stop()
+            #self.move_forward()
+    #self.stop()
     if walls['right'] == 0:
         self.turn_right()
         self.move_forward()
@@ -468,7 +438,6 @@ def exit_from_laberinth(self, message=''):
         self.move_forward()
     else:
         self.turn_left()
-
 
     messages = self.read_messages()
     if len(messages) > 0:
@@ -869,7 +838,7 @@ def test_WumpusWorld():
         #lb1.create_agent('silly' + str(i+1), move_silly)
         #lb1.create_agent('Random' + str(i + 1), move_randomly)
         #lb1.create_agent('Smarter', exit_from_laberinth_complex_v2)#exit_from_laberinth_complex) #exit_from_laberinth)
-        lb1.create_agent('RightWall', 1, exit_from_laberinth)
+        lb1.create_agent('Sergio', 1, exit_from_laberinth)
     winner = lb1.run()
 
     if winner is not None:

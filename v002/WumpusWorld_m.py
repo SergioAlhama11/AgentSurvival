@@ -8,6 +8,11 @@ from v002.Enviroment import Orientation
 
 class WumpusWorld(Enviroment_with_agents):
     class _Hidden_Agent2(Enviroment_with_agents._Hidden_Agent):
+        def _stop(self):
+            self._send_message({'type': 'Fin',
+                                'Description': 'Termina el juego'})
+            self._should_stop = True
+
         def shoot(self):
             my_laberinth = self._Hidden_Agent__laberinth
             disparos = self.get_shoots()
@@ -19,7 +24,6 @@ class WumpusWorld(Enviroment_with_agents):
                 print("Has disparado una flecha")
                 successful_shot = False
 
-                #disparos -= 1 #TODO Cambiar ya que sino es necesario recoger la flecha para poder matar al wumpus
                 # print(self.__dict__.keys())
 
                 position_below = [wumpus.pos_y - 1, wumpus.pos_x]
@@ -37,22 +41,23 @@ class WumpusWorld(Enviroment_with_agents):
                     if self._get_position() == position_right and self.get_orientation() == Orientation.LEFT:
                         successful_shot = True
 
-                if successful_shot:
-                    print("La flecha SI le ha dado al Wumpus")
-                    wumpus.die()
-                    # self._environment._winner = agents[i]
-                    # self._should_stop = True
+                    if successful_shot:
+                        print("La flecha SI le ha dado al Wumpus")
+                        wumpus.die()
+                        #self._environment._winner = agents[i]
+                        #self._should_stop = True
 
-                if not successful_shot:
-                    print("La flecha NO le ha dado al Wumpus")
+                    if not successful_shot:
+                        print("La flecha NO le ha dado al Wumpus")
 
                 self._shoots -= 1
+                print("Flechas restantes: " + str(self._shoots))
 
             else:
-                print("NO has disparado una flecha. NO hay disparos suficientes")
-
-
-
+                if wumpus.is_alive():
+                    print("NO has disparado una flecha. NO hay disparos suficientes")
+                else:
+                    print("NO has disparado una flecha. WUMPUS ya está muerto")
 
         def take_arrow(self):
             my_laberinth = self._Hidden_Agent__laberinth
@@ -66,7 +71,7 @@ class WumpusWorld(Enviroment_with_agents):
                 self._arrow = True
                 if self._arrow:
                     self._shoots += 1
-                    print("Flechas: " + str(self._shoots))
+                    print("+1 Flecha")
 
     class _Entry(Enviroment_with_agents._Object):
 
@@ -90,10 +95,10 @@ class WumpusWorld(Enviroment_with_agents):
             position = hiden_agent._get_position()
             if position[1] == self._pos_x and \
                     position[0] == self._pos_y:
-                #self._environment._exit_found = True
-                #self._environment._winner = hiden_agent
-                #hiden_agent._should_stop = True
-                hiden_agent._send_message({'type': 'success laberinth', 'Description': 'You exited from the laberinth'})
+                self._environment._exit_found = True
+                self._environment._winner = hiden_agent
+                hiden_agent._should_stop = True
+                hiden_agent._send_message({'type': 'WIN', 'Description': '¡Has salido del laberinto!'})
 
         def plot(self):
             pl.plot(self._pos_x + 0.5, self._pos_y + 0.5, 'ro')
@@ -126,6 +131,9 @@ class WumpusWorld(Enviroment_with_agents):
         def die(self):
             self._alive = False
 
+        def get_alive(self):
+            return self._alive
+
         def plot(self):
             if self.is_alive():
                 pl.gca().imshow(self.__my_avatar,
@@ -136,50 +144,12 @@ class WumpusWorld(Enviroment_with_agents):
                                 extent=[self._pos_x + 0.2, self._pos_x + 0.8,
                                         self._pos_y + 0.2, self._pos_y + 0.8])
 
-        '''def shoot(self):
-            agents = self._environment._Enviroment_with_agents__hidden_agents
-            for i in agents:
-                shoots = agents[i]._get_shoots()
-                successful_shot = False
-                if agents[i]._arrow:
-                    shoots += 1
-                if shoots >= 1:
-                    position_above = [self.pos_y - 1, self.pos_x]
-                    position_below = [self.pos_y + 1, self.pos_x]
-                    position_left = [self.pos_y, self.pos_x - 1]
-                    position_right = [self.pos_y, self.pos_x + 1]
-
-                    # Disparar desde abajo
-                    if agents[i]._Hidden_Agent__position == position_above and not self._environment.exists_bottomWall(
-                            self.pos_x, self.pos_y) and agents[i]._Hidden_Agent__orientation == Orientation.UP:
-                        successful_shot = True
-                    # Disparar desde arriba
-                    elif agents[i]._Hidden_Agent__position == position_below and not self._environment.exists_upperWall(
-                            self.pos_x, self.pos_y) and agents[i]._Hidden_Agent__orientation == Orientation.DOWN:
-                        successful_shot = True
-                    # Disparar desde la izquierda
-                    elif agents[i]._Hidden_Agent__position == position_left and not self._environment.exists_leftWall(
-                            self.pos_x, self.pos_y) and agents[i]._Hidden_Agent__orientation == Orientation.RIGHT:
-                        successful_shot = True
-                    # Disparar desde la derecha
-                    elif agents[i]._Hidden_Agent__position == position_right and not self._environment.exists_rightWall(
-                            self.pos_x, self.pos_y) and agents[i]._Hidden_Agent__orientation == Orientation.LEFT:
-                        successful_shot = True
-
-                if successful_shot:
-                    shoots -= 1
-                    self._alive = False
-                    #self._environment._winner = agents[i]
-                    #agents[i]._should_stop = True'''
-
         def _notify_time_iteration(self):
             agents = self._environment._Enviroment_with_agents__hidden_agents
-            #self.shoot()
             for i in agents:
                 if agents[i]._Hidden_Agent__position == [self.pos_y, self.pos_x] and self._alive:
-                    #agents[i]._should_stop = True
-                    agents[i]._send_message({'type': 'Unsuccess laberinth',
-                                             'Description': 'You have died by the Wumpus'})
+                    agents[i]._send_message({'type': 'Game Over', 'Description': 'El Wumpus te ha deborado'})
+                    agents[i]._should_stop = True
 
         def _get_info(self):
             return {'type': 'wumpus', 'Description': 'Te has topado con el Wumpus y te ha deborado'}
@@ -198,9 +168,8 @@ class WumpusWorld(Enviroment_with_agents):
             agents = self._environment._Enviroment_with_agents__hidden_agents
             for i in agents:
                 if agents[i]._Hidden_Agent__position == [self.pos_y, self.pos_x]:
-                    #agents[i]._should_stop = True
-                    agents[i]._send_message({'type': 'unsuccess laberinth',
-                                             'Description': 'You have fallen into a hole'})
+                    agents[i]._send_message({'type': 'Game Over', 'Description': 'Has caído en un hoyo sin fondo.'})
+                    agents[i]._should_stop = True
 
         def _get_info(self):
             return {'type': 'hole', 'Description': 'Has caido en un agujero'}
@@ -219,7 +188,7 @@ class WumpusWorld(Enviroment_with_agents):
             agents = self._environment._Enviroment_with_agents__hidden_agents
             for i in agents:
                 if agents[i]._Hidden_Agent__position == [self.pos_y, self.pos_x]:
-                    agents[i]._send_message({'type': 'viento', 'Description': 'Se percibe viento'})
+                    agents[i]._send_message({'type': 'Viento', 'Description': 'Se percibe viento en esta casilla. Debe de haber un hoyo cerca.'})
 
         def _get_info(self):
             return {'type': 'wind', 'Description': 'Hay un agujero cerca'}
@@ -238,7 +207,7 @@ class WumpusWorld(Enviroment_with_agents):
             agents = self._environment._Enviroment_with_agents__hidden_agents
             for i in agents:
                 if agents[i]._Hidden_Agent__position == [self.pos_y, self.pos_x]:
-                    agents[i]._send_message({'type': 'hedor', 'Description': 'Se percibe hedor'})
+                    agents[i]._send_message({'type': 'Hedor', 'Description': 'Se percibe hedor en esta casilla. El Wumpus debe estar cerca.'})
 
         def _get_info(self):
             return {'type': 'stench', 'Description': 'Está el wumpus cerca'}
@@ -262,7 +231,7 @@ class WumpusWorld(Enviroment_with_agents):
                 if agents[i]._Hidden_Agent__position == [self.pos_y, self.pos_x] and self.is_active():
                     #self.__is_active = False
                     #agents[i]._arrow = True
-                    agents[i]._send_message({'type': 'arrow', 'Description': 'You have taken an arrow from the floor'})
+                    agents[i]._send_message({'type': 'Flecha', 'Description': 'Has recogido una flecha del suelo'})
 
         def plot(self):
             if self.is_active():

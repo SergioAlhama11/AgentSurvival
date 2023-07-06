@@ -793,6 +793,7 @@ class Enviroment_with_agents(Enviroment):
                 agent2._move_forward_agent,
                 agent2._turn_left_agent,
                 agent2._turn_right_agent,
+                agent2._stop,
                 agent2._whats_here,
                 agent2._read_messages, agent2.shoot, agent2.take_arrow)
             self.__outer_agents[id] = new_agent
