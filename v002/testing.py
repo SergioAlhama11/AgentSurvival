@@ -415,19 +415,19 @@ def exit_from_laberinth(self, message=''):
             i['exit_function'](self)
         if i['type'] == 'arrow':
             self.take_arrow()
-        '''if i['type'] == 'stench':
+        if i['type'] == 'stench':
             if walls['front'] == 0:
-                self.shoot()'''
+                self.shoot()
 
         if i['type'] == 'wind':
             self.turn_right()
             self.turn_right()
             if walls['right'] == 0 and walls['front'] == 0:
                 self.move_forward()
-                print("OOO")
+                #print("OOO")
             if walls['right'] == 0:
                 self.turn_left()
-                print("EEE")
+                #print("EEE")
                 #self.stop()
             #self.move_forward()
     #self.stop()
